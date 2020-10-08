@@ -3,19 +3,20 @@ import Cell from './Cell';
 import NumberPad from './NumberPad';
 import './Grid.css';
 
-function Grid() {
+function Grid(props) {
 
     const ref = useRef(null);
 
-    const [values, setValues] = useState([[[],[],[],[],[],[],[],[],[]],[[],[],[],[],[],[],[],[],[]],[[],[],[],[],[],[],[],[],[]],[[],[],[],[],[],[],[],[],[]],[[],[],[],[],[],[],[],[],[]],[[],[],[],[],[],[],[],[],[]],[[],[],[],[],[],[],[],[],[]],[[],[],[],[],[],[],[],[],[]],[[],[],[],[],[],[],[],[],[]]]);
+    const gridValues = props.values;
 
     const [cellClicked, setCellClicked] = useState(null);
     const [activeCell, setActiveCell] = useState(null);
 
     function handleChange(coords, e) {
-        const newValues = [...values];
+        const newValues = [...gridValues];
         newValues[activeCell[0]][activeCell[1]] = e.target.value;
-        setValues(newValues);
+        //setValues(newValues);
+        props.onValueChange(newValues);
         ref.current.hideNumberPad();
     }
 
@@ -30,10 +31,10 @@ function Grid() {
     }
 
     function handleNumberPadButtonClick(e) {
-        console.log(e.target.value);
-        const newValues = [...values];
+        const newValues = [...gridValues];
         newValues[activeCell[0]][activeCell[1]] = e.target.value;
-        setValues(newValues);
+        //setValues(newValues);
+        props.onValueChange(newValues);
         ref.current.hideNumberPad();
     }
 
@@ -55,7 +56,7 @@ function Grid() {
                 row={i}
                 column={j}
                 key={`r${i}c${j}`}
-                value={values[i][j]}
+                value={gridValues[i][j]}
                 handleChange={handleChange}
                 handleClick={handleCellClick}
             />
