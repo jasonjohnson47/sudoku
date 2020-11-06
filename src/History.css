@@ -1,0 +1,8 @@
+.history ol {
+    padding-left: 0;
+    list-style: none;
+}
+.history ol li {
+    display: inline-block;
+    margin-right: 0.25rem;
+}

@@ -1,11 +1,12 @@
 import React from 'react';
+import './History.css';
 
 function History(props) {
 
     const steps = props.history.map((currentStep, step) => {
         const desc = step ?
-            'Go to step ' + step :
-            'Go to game start';
+            step :
+            'Start';
         return (
             <li key={step}>
                 <button
@@ -18,9 +19,12 @@ function History(props) {
     });
 
     return (
-        <ol className="history">
-            {steps}
-        </ol>
+        <div className="history">
+            <h2>Game History</h2>
+            <ol>
+                {steps}
+            </ol>
+        </div>
     );
 }
 
