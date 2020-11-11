@@ -1,0 +1,29 @@
+Create a game
+- various levels of complexity: easy, medium, expert
+- predetermined boards, computer generated boards, via smartphone camera or picture import
+- user can manually enter numbers prior to starting puzzle
+
+Play the game
+- user can manually enter numbers via mouse or keyboard
+  - if number is incorrect, user is notified (if setting is enabled)
+- user can ask for a hint, telling cell numbers are highlighted
+- button to automatically solve one cell
+- button to solve entire puzzle
+
+Keep history of game play, one step for each solved cell
+Setting to be notified of incorrectly entered numbers
+Setting to show candidates
+Cache the current board via web storage
+Verify completed game when last number is filled in
+
+Game Panel
+----------
+- CONTROLS
+--- Generate Game: Easy, Medium, Expert
+--- Create Custom Game (clear board of all numbers, button for Start Solving Puzzle)
+--- Get a Hint
+--- Solve One Cell
+--- Solve the Puzzle
+- SETTINGS
+--- Notify of incorrect numbers (checkbox)
+--- Show candidates (checkbox)

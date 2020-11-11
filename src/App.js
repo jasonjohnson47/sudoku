@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Grid from './Grid';
 import History from './History';
 import games from './games';
@@ -9,10 +9,15 @@ function App() {
         return [[[],[],[],[],[],[],[],[],[]],[[],[],[],[],[],[],[],[],[]],[[],[],[],[],[],[],[],[],[]],[[],[],[],[],[],[],[],[],[]],[[],[],[],[],[],[],[],[],[]],[[],[],[],[],[],[],[],[],[]],[[],[],[],[],[],[],[],[],[]],[[],[],[],[],[],[],[],[],[]],[[],[],[],[],[],[],[],[],[]]];
     }
 
-    const [history, setHistory] = useState([{
-        grid: generateEmptyBoard()
-    }]);
+    const [history, setHistory] = useState(
+        JSON.parse(localStorage.getItem('sudokuHistory')) || [{
+            grid: generateEmptyBoard()
+        }]);
     const [stepNumber, setStepNumber] = useState(0);
+
+    useEffect(() => {
+        localStorage.setItem('sudokuHistory', JSON.stringify(history));
+    }, [history]);
 
     const clone = require('rfdc')();
     const prevHistory = clone(history);
