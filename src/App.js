@@ -12,12 +12,16 @@ function App() {
     const [history, setHistory] = useState(
         JSON.parse(localStorage.getItem('sudokuHistory')) || [{
             grid: generateEmptyBoard()
-        }]);
-    const [stepNumber, setStepNumber] = useState(0);
+        }]
+    );
+    const [stepNumber, setStepNumber] = useState(
+        Number(localStorage.getItem('sudokuStepNumber')) || 0
+    );
 
     useEffect(() => {
         localStorage.setItem('sudokuHistory', JSON.stringify(history));
-    }, [history]);
+        localStorage.setItem('sudokuStepNumber', stepNumber);
+    }, [history, stepNumber]);
 
     const clone = require('rfdc')();
     const prevHistory = clone(history);
@@ -27,7 +31,7 @@ function App() {
         addHistory({
             grid: values
         });
-        setStepNumber(stepNumber + 1);
+        setStepNumber(history.length);
     }
 
     function jumpToStep(step) {
