@@ -3,27 +3,35 @@ import './History.css';
 
 function History(props) {
 
-    const steps = props.history.map((currentStep, step) => {
-        const desc = step ?
-            step :
-            'Start';
-        return (
-            <li key={step}>
-                <button
-                    onClick={() => props.jumpToStep(step)}
-                >
-                    {desc}
-                </button>
-            </li>
-        );
-    });
+    const currentStep = props.currentStep;
+    const historyLength = props.history.length;
+
+    // Previous Button
+    const previousButtonProps = {
+        onClick: () => props.jumpToStepInHistory(currentStep - 1),
+        disabled: false
+    }
+    if (currentStep === 0) {
+        previousButtonProps.disabled = true;
+    }
+
+    // Next Button
+    const nextButtonProps = {
+        onClick: () => props.jumpToStepInHistory(currentStep + 1),
+        disabled: false
+    }
+    if (historyLength - 1 === currentStep) {
+        nextButtonProps.disabled = true;
+    }
 
     return (
         <div className="history">
             <h2>Game History</h2>
-            <ol>
-                {steps}
-            </ol>
+            <div className="history-nav">
+                <button {...previousButtonProps}>Previous Step</button>
+                <span className="history-current-step">{currentStep}</span>
+                <button {...nextButtonProps}>Next Step</button>
+            </div>
         </div>
     );
 }

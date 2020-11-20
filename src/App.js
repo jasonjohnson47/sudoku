@@ -34,7 +34,7 @@ function App() {
         setStepNumber(history.length);
     }
 
-    function jumpToStep(step) {
+    function jumpToStepInHistory(step) {
         setStepNumber(step);
     }
 
@@ -70,7 +70,7 @@ function App() {
                 </fieldset>
                 <h2>Settings</h2>
             </div>
-            <History history={history} jumpToStep={jumpToStep} />
+            <History history={history} jumpToStepInHistory={jumpToStepInHistory} currentStep={stepNumber} />
         </div>
     );
 }
