@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Grid from './Grid';
 import History from './History';
 import games from './games';
+import { solveNonets, removeNakeds, reduceCandidatesXWing, initReduceCandidates, solveCells, setCandidates, verifyCompletedGrid } from './logic';
 
 function App() {
 
@@ -26,12 +27,27 @@ function App() {
     const clone = require('rfdc')();
     const prevHistory = clone(history);
     const addHistory = newHistory => setHistory([...prevHistory, newHistory]);
+    const currentGridValues = history[stepNumber].grid;
 
     function onValueChange(values) {
         addHistory({
             grid: values
         });
         setStepNumber(history.length);
+    }
+
+    function updateCells(cells) {
+        if (cells.length !== 0) {
+            //console.log(cells);
+            const newValues = currentGridValues;
+            cells.forEach(function(cell) {
+                newValues[cell.row][cell.column] = cell.value;
+            });
+            addHistory({
+                grid: newValues
+            });
+            setStepNumber(history.length);
+        }
     }
 
     function jumpToStepInHistory(step) {
@@ -44,7 +60,7 @@ function App() {
 
     return (
         <div className="App">
-            <Grid values={history[stepNumber].grid} onValueChange={onValueChange} />
+            <Grid values={currentGridValues} onValueChange={onValueChange} />
             <div className="game-panel">
                 <h2>Controls</h2>
                 <fieldset>
@@ -68,6 +84,21 @@ function App() {
                         }
                     }>Expert</button>
                 </fieldset>
+                <button onClick={ () => {
+                    updateCells(setCandidates(currentGridValues));
+                }}>Set Candidates</button>
+                <button onClick={ () => {
+                    updateCells(solveCells(currentGridValues));
+                }}>Solve Cells</button>
+                <button onClick={ () => {
+                    updateCells(solveNonets(currentGridValues));
+                }}>Solve Nonets</button>
+                <button onClick={ () => {
+                    updateCells(removeNakeds(currentGridValues));
+                }}>Remove Nakeds</button>
+                <button onClick={ () => {
+                    updateCells(initReduceCandidates(currentGridValues));
+                }}>Reduce Candidates</button>
                 <h2>Settings</h2>
             </div>
             <History history={history} jumpToStepInHistory={jumpToStepInHistory} currentStep={stepNumber} />

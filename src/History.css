@@ -1,8 +1,11 @@
-.history ol {
-    padding-left: 0;
-    list-style: none;
+.history-current-step {
+    margin-left:.5em;
+    margin-right:.5em;
+    display: block;
+    line-height: 2.375rem;
 }
-.history ol li {
-    display: inline-block;
-    margin-right: 0.25rem;
+.history-nav button svg {
+    width:.75rem;
+    height:2rem;
+    display:block;
 }
