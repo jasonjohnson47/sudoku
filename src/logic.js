@@ -389,43 +389,64 @@ function removeNakedsFromUnit(nakeds, unitValues, unitIndexes, unitType) {
 function removeNakeds(grid) {
 
     const results = [];
+    const clone = require('rfdc')();
+    const gridClone = clone(grid);
 
-    grid.forEach(function(rowValues, rowIndex) {
+    gridClone.forEach(function(rowValues, rowIndex) {
         const removeNakeds3 = removeNakedsFromUnit(findNakeds(3, rowValues), rowValues, { 'row': rowIndex }, 'row');
         const removeNakeds4 = removeNakedsFromUnit(findNakeds(4, rowValues), rowValues, { 'row': rowIndex }, 'row');
 
         if (removeNakeds3 !== undefined) {
             results.push(...removeNakeds3);
+            removeNakeds3.forEach(function(updatedCell) {
+                gridClone[updatedCell.row][updatedCell.column] = updatedCell.value;
+            });
         }
         if (removeNakeds4 !== undefined) {
             results.push(...removeNakeds4);
+            removeNakeds4.forEach(function(updatedCell) {
+                gridClone[updatedCell.row][updatedCell.column] = updatedCell.value;
+            });
         }
+
     });
 
-    grid[0].forEach(function(column, columnIndex) {
-        const columnValues = getColumnValues(grid, columnIndex);
+    gridClone[0].forEach(function(column, columnIndex) {
+        const columnValues = getColumnValues(gridClone, columnIndex);
         const removeNakeds3 = removeNakedsFromUnit(findNakeds(3, columnValues), columnValues, { 'column': columnIndex }, 'column');
         const removeNakeds4 = removeNakedsFromUnit(findNakeds(4, columnValues), columnValues, { 'column': columnIndex }, 'column');
 
         if (removeNakeds3 !== undefined) {
             results.push(...removeNakeds3);
+            removeNakeds3.forEach(function(updatedCell) {
+                gridClone[updatedCell.row][updatedCell.column] = updatedCell.value;
+            });
         }
         if (removeNakeds4 !== undefined) {
             results.push(...removeNakeds4);
+            removeNakeds4.forEach(function(updatedCell) {
+                gridClone[updatedCell.row][updatedCell.column] = updatedCell.value;
+            });
         }
     });
 
     for (let rowIndex = 0; rowIndex <= 6; rowIndex = rowIndex + 3) {
         for (let columnIndex = 0; columnIndex <= 6; columnIndex = columnIndex + 3) {
-            const nonetValues = getNonetValues(grid, rowIndex, columnIndex);
+            const nonetValues = getNonetValues(gridClone, rowIndex, columnIndex);
             const removeNakeds3 = removeNakedsFromUnit(findNakeds(3, nonetValues), nonetValues, { 'row': rowIndex,'column': columnIndex }, 'nonet');
             const removeNakeds4 = removeNakedsFromUnit(findNakeds(4, nonetValues), nonetValues, { 'row': rowIndex, 'column': columnIndex }, 'nonet');
 
             if (removeNakeds3 !== undefined) {
                 results.push(...removeNakeds3);
+                removeNakeds3.forEach(function(updatedCell) {
+                    gridClone[updatedCell.row][updatedCell.column] = updatedCell.value;
+                });
             }
             if (removeNakeds4 !== undefined) {
                 results.push(...removeNakeds4);
+                removeNakeds4.forEach(function(updatedCell) {
+                    gridClone[updatedCell.row][updatedCell.column] = updatedCell.value;
+                });
             }
         }
     }
