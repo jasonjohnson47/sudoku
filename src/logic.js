@@ -342,6 +342,9 @@ function findNakeds(quantity, unitValues) {
 }
 
 function removeNakedsFromUnit(nakeds, unitValues, unitIndexes, unitType) {
+
+    const results = [];
+
     if (nakeds) {
         unitValues.forEach(function(cellValue, index) {
             if (Array.isArray(cellValue)) {
@@ -350,61 +353,85 @@ function removeNakedsFromUnit(nakeds, unitValues, unitIndexes, unitType) {
                 });
                 if (differentCandidates.length !== 0) {
                     if (unitType === 'row') {
-                        //controller.updateCell(unitIndexes.row, index, differentCandidates);
-                        return {
+                        results.push({
                             row: unitIndexes.row,
                             column: index,
                             value: differentCandidates
-                        };
+                        });
                     }
                     if (unitType === 'column') {
-                        //controller.updateCell(index, unitIndexes.column, differentCandidates);
-                        return {
+                        results.push({
                             row: index,
                             column: unitIndexes.column,
                             value: differentCandidates
-                        };
+                        });
                     }
                     if (unitType === 'nonet') {
                         const gridCell = nonetValuesArrayIndexToGridCell(index, unitIndexes.row, unitIndexes.column);
-                        //controller.updateCell(gridCell[0], gridCell[1], differentCandidates);
-                        return {
+                        results.push({
                             row: gridCell[0],
                             column: gridCell[1],
                             value: differentCandidates
-                        };
+                        });
                     }
                 }
             }
         });
     }
+
+    if (results.length !== 0) {
+        //console.log(results);
+        return results;
+    }
+
 }
 
 function removeNakeds(grid) {
 
-    const cells = [];
+    const results = [];
 
     grid.forEach(function(rowValues, rowIndex) {
-        cells.push(removeNakedsFromUnit(findNakeds(3, rowValues), rowValues, { 'row': rowIndex }, 'row'));
-        cells.push(removeNakedsFromUnit(findNakeds(4, rowValues), rowValues, { 'row': rowIndex }, 'row'));
+        const removeNakeds3 = removeNakedsFromUnit(findNakeds(3, rowValues), rowValues, { 'row': rowIndex }, 'row');
+        const removeNakeds4 = removeNakedsFromUnit(findNakeds(4, rowValues), rowValues, { 'row': rowIndex }, 'row');
+
+        if (removeNakeds3 !== undefined) {
+            results.push(...removeNakeds3);
+        }
+        if (removeNakeds4 !== undefined) {
+            results.push(...removeNakeds4);
+        }
     });
 
     grid[0].forEach(function(column, columnIndex) {
         const columnValues = getColumnValues(grid, columnIndex);
-        cells.push(removeNakedsFromUnit(findNakeds(3, columnValues), columnValues, { 'column': columnIndex }, 'column'));
-        cells.push(removeNakedsFromUnit(findNakeds(4, columnValues), columnValues, { 'column': columnIndex }, 'column'));
+        const removeNakeds3 = removeNakedsFromUnit(findNakeds(3, columnValues), columnValues, { 'column': columnIndex }, 'column');
+        const removeNakeds4 = removeNakedsFromUnit(findNakeds(4, columnValues), columnValues, { 'column': columnIndex }, 'column');
+
+        if (removeNakeds3 !== undefined) {
+            results.push(...removeNakeds3);
+        }
+        if (removeNakeds4 !== undefined) {
+            results.push(...removeNakeds4);
+        }
     });
 
     for (let rowIndex = 0; rowIndex <= 6; rowIndex = rowIndex + 3) {
         for (let columnIndex = 0; columnIndex <= 6; columnIndex = columnIndex + 3) {
             const nonetValues = getNonetValues(grid, rowIndex, columnIndex);
-            cells.push(removeNakedsFromUnit(findNakeds(3, nonetValues), nonetValues, { 'row': rowIndex,'column': columnIndex }, 'nonet'));
-            cells.push(removeNakedsFromUnit(findNakeds(4, nonetValues), nonetValues, { 'row': rowIndex, 'column': columnIndex }, 'nonet'));
+            const removeNakeds3 = removeNakedsFromUnit(findNakeds(3, nonetValues), nonetValues, { 'row': rowIndex,'column': columnIndex }, 'nonet');
+            const removeNakeds4 = removeNakedsFromUnit(findNakeds(4, nonetValues), nonetValues, { 'row': rowIndex, 'column': columnIndex }, 'nonet');
+
+            if (removeNakeds3 !== undefined) {
+                results.push(...removeNakeds3);
+            }
+            if (removeNakeds4 !== undefined) {
+                results.push(...removeNakeds4);
+            }
         }
     }
 
-    const solvedCells = cells.filter(cell => cell !== undefined);
-    return solvedCells;
+    //console.log(results);
+    return results;
 
 }
 
@@ -575,6 +602,7 @@ function findXWings(grid) {
 function reduceCandidatesXWing(grid) {
 
     const xWings = findXWings(grid);
+    const results = [];
 
     xWings.forEach(function(xWing) {
 
@@ -599,7 +627,10 @@ function reduceCandidatesXWing(grid) {
                 rowValues.forEach(function(cellValue, index) {
                     if (!xWingColumns.includes(index)) {
                         if (Array.isArray(cellValue)) {
-                            removeCandidateFromCell(grid, xWingRow, index, xWing.value);
+                            const candidatesToRemove = removeCandidateFromCell(grid, xWingRow, index, xWing.value);
+                            if (candidatesToRemove !== undefined) {
+                                results.push(candidatesToRemove);
+                            }
                         }
                     }
                 });
@@ -614,7 +645,10 @@ function reduceCandidatesXWing(grid) {
                 columnValues.forEach(function(cellValue, index) {
                     if (!xWingRows.includes(index)) {
                         if (Array.isArray(cellValue)) {
-                            removeCandidateFromCell(grid, index, xWingColumn, xWing.value);
+                            const candidatesToRemove = removeCandidateFromCell(grid, index, xWingColumn, xWing.value);
+                            if (candidatesToRemove !== undefined) {
+                                results.push(candidatesToRemove);
+                            }
                         }
                     }
                 });
@@ -623,6 +657,8 @@ function reduceCandidatesXWing(grid) {
         }
 
     });
+
+    return results;
 
 }
 
@@ -634,6 +670,11 @@ function removeCandidateFromCell(grid, row, column, value) {
             return candidate !== value;
         });
         //controller.updateCell(row, column, cellValueResult);
+        return {
+            row: row,
+            column: column,
+            value: cellValueResult
+        };
     }
 }
 

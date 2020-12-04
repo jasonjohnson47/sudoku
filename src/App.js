@@ -95,10 +95,16 @@ function App() {
                 }}>Solve Nonets</button>
                 <button onClick={ () => {
                     updateCells(removeNakeds(currentGridValues));
-                }}>Remove Nakeds</button>
+                }}>Nakeds</button>
+                <button onClick={ () => {
+                    updateCells(reduceCandidatesXWing(currentGridValues));
+                }}>X-Wings</button>
                 <button onClick={ () => {
                     updateCells(initReduceCandidates(currentGridValues));
                 }}>Reduce Candidates</button>
+                <button onClick={ () => {
+                    verifyCompletedGrid(currentGridValues);
+                }}>Verify Completed Game</button>
                 <h2>Settings</h2>
             </div>
             <History history={history} jumpToStepInHistory={jumpToStepInHistory} currentStep={stepNumber} />
