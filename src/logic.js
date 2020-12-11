@@ -107,15 +107,7 @@ function isCellSolved (grid, row, column) {
         return true;
     }
 }
-/*
-function cellHasCandidates (grid, row, column) {
-    const value = grid[row][column];
 
-    if (Array.isArray(value) && value.length > 1) {
-        return true;
-    }
-}
-*/
 function isCleanValue(value) {
     // check if the value is an empty array
     if (Array.isArray(value) && value.length === 0) {
@@ -252,7 +244,6 @@ function solveNonets(grid) {
             }
         }
     }
-    setCandidates(grid);
     return solvedCells;
 }
 
@@ -341,6 +332,10 @@ function findNakeds(quantity, unitValues) {
 
 }
 
+const arraysAreEqual = (array1, array2) => 
+    array1.length === array2.length &&
+    array1.every((element, index) => element === array2[index]);
+
 function removeNakedsFromUnit(nakeds, unitValues, unitIndexes, unitType) {
 
     const results = [];
@@ -351,7 +346,8 @@ function removeNakedsFromUnit(nakeds, unitValues, unitIndexes, unitType) {
                 const differentCandidates = cellValue.filter(function(value) {
                     return !nakeds.includes(value);
                 });
-                if (differentCandidates.length !== 0) {
+                //differentCandidates.filter(candidate => nakeds.includes(candidate));
+                if (differentCandidates.length !== 0 && !arraysAreEqual(differentCandidates, cellValue)) {
                     if (unitType === 'row') {
                         results.push({
                             row: unitIndexes.row,
@@ -380,7 +376,6 @@ function removeNakedsFromUnit(nakeds, unitValues, unitIndexes, unitType) {
     }
 
     if (results.length !== 0) {
-        //console.log(results);
         return results;
     }
 
@@ -451,7 +446,6 @@ function removeNakeds(grid) {
         }
     }
 
-    //console.log(results);
     return results;
 
 }
@@ -622,7 +616,9 @@ function findXWings(grid) {
 
 function reduceCandidatesXWing(grid) {
 
-    const xWings = findXWings(grid);
+    const clone = require('rfdc')();
+    const gridClone = clone(grid);
+    const xWings = findXWings(gridClone);
     const results = [];
 
     xWings.forEach(function(xWing) {
@@ -644,13 +640,14 @@ function reduceCandidatesXWing(grid) {
         if (xWing.axis === 'column') {
 
             xWingRows.forEach(function(xWingRow) {
-                const rowValues = getRowValues(grid, xWingRow);
+                const rowValues = getRowValues(gridClone, xWingRow);
                 rowValues.forEach(function(cellValue, index) {
                     if (!xWingColumns.includes(index)) {
                         if (Array.isArray(cellValue)) {
-                            const candidatesToRemove = removeCandidateFromCell(grid, xWingRow, index, xWing.value);
+                            const candidatesToRemove = removeCandidateFromCell(gridClone, xWingRow, index, xWing.value);
                             if (candidatesToRemove !== undefined) {
                                 results.push(candidatesToRemove);
+                                gridClone[candidatesToRemove.row][candidatesToRemove.column] = candidatesToRemove.value;
                             }
                         }
                     }
@@ -662,13 +659,14 @@ function reduceCandidatesXWing(grid) {
         if (xWing.axis === 'row') {
 
             xWingColumns.forEach(function(xWingColumn) {
-                const columnValues = getColumnValues(grid, xWingColumn);
+                const columnValues = getColumnValues(gridClone, xWingColumn);
                 columnValues.forEach(function(cellValue, index) {
                     if (!xWingRows.includes(index)) {
                         if (Array.isArray(cellValue)) {
-                            const candidatesToRemove = removeCandidateFromCell(grid, index, xWingColumn, xWing.value);
+                            const candidatesToRemove = removeCandidateFromCell(gridClone, index, xWingColumn, xWing.value);
                             if (candidatesToRemove !== undefined) {
                                 results.push(candidatesToRemove);
+                                gridClone[candidatesToRemove.row][candidatesToRemove.column] = candidatesToRemove.value;
                             }
                         }
                     }
@@ -701,15 +699,24 @@ function removeCandidateFromCell(grid, row, column, value) {
 
 function initReduceCandidates(grid) {
     const results = [];
+    const clone = require('rfdc')();
+    const gridClone = clone(grid);
+
     for (let row = 0; row <= 6; row = row + 3) {
         for (let col = 0; col <= 6; col = col + 3) {
-            const reducedCandidatesRow = reduceCandidates(grid, row, col, 'row');
-            const reducedCandidatesColumn = reduceCandidates(grid, row, col, 'column');
+            const reducedCandidatesRow = reduceCandidates(gridClone, row, col, 'row');
+            const reducedCandidatesColumn = reduceCandidates(gridClone, row, col, 'column');
             if (reducedCandidatesRow !== undefined) {
                 results.push(...reducedCandidatesRow);
+                reducedCandidatesRow.forEach(function(updatedCell) {
+                    gridClone[updatedCell.row][updatedCell.column] = updatedCell.value;
+                });
             }
             if (reducedCandidatesColumn !== undefined) {
                 results.push(...reducedCandidatesColumn);
+                reducedCandidatesColumn.forEach(function(updatedCell) {
+                    gridClone[updatedCell.row][updatedCell.column] = updatedCell.value;
+                });
             }
         }
     }
@@ -867,7 +874,6 @@ function reduceCandidates(grid, row, column, direction) {
     });
 
     if (results.length !== 0) {
-        //console.log(results);
         return results;
     }
 
@@ -911,7 +917,7 @@ function solveCell(grid, row, column) {
                 });
 
                 if (candidateInSomeArray) {
-                    // do nothing, the candidate does exist as a candidate for another cell in the same row
+                    // do nothing, the candidate exists as a candidate for another cell in the same row
                 } else {
                     newCandidates.push(candidate);
                 }
@@ -929,7 +935,7 @@ function solveCell(grid, row, column) {
                 });
 
                 if (candidateInSomeArray) {
-                    // do nothing, the candidate does exist as a candidate for another cell in the same column
+                    // do nothing, the candidate exists as a candidate for another cell in the same column
                 } else {
                     newCandidates.push(candidate);
                 }
@@ -940,7 +946,6 @@ function solveCell(grid, row, column) {
         newCandidates = Array.from(new Set(newCandidates));
 
         if (newCandidates.length === 1) {
-            // if a single candidate works, return that cell row, column and value
             return {
                 row: row,
                 column: column,
@@ -994,8 +999,8 @@ function solveCells(grid) {
 }
 
 function verifyCompletedGrid(grid) {
-    let gridColumns = [];
-    let gridNonets = [];
+    const gridColumns = [];
+    const gridNonets = [];
 
     // Check rows
     const allRowsIncludeAllValues = grid.every(function(row) {
