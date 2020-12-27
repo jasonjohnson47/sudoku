@@ -1,3 +1,13 @@
+import _ from 'lodash';
+
+function updateGrid(grid, updatedCells) {
+    const updatedGrid = _.cloneDeep(grid);
+    updatedCells.forEach(function(cell) {
+        updatedGrid[cell.row][cell.column] = cell.value;
+    });
+    return updatedGrid;
+}
+
 function generateNonet(grid, topLeftCellRow, topLeftCellCol) {
     let nonet = [];
 
@@ -244,7 +254,9 @@ function solveNonets(grid) {
             }
         }
     }
-    return solvedCells;
+    const updatedGrid = updateGrid(grid, solvedCells);
+
+    return setCandidates(updatedGrid);
 }
 
 function getCandidates(grid, row, column) {
@@ -332,10 +344,6 @@ function findNakeds(quantity, unitValues) {
 
 }
 
-const arraysAreEqual = (array1, array2) => 
-    array1.length === array2.length &&
-    array1.every((element, index) => element === array2[index]);
-
 function removeNakedsFromUnit(nakeds, unitValues, unitIndexes, unitType) {
 
     const results = [];
@@ -347,7 +355,7 @@ function removeNakedsFromUnit(nakeds, unitValues, unitIndexes, unitType) {
                     return !nakeds.includes(value);
                 });
                 //differentCandidates.filter(candidate => nakeds.includes(candidate));
-                if (differentCandidates.length !== 0 && !arraysAreEqual(differentCandidates, cellValue)) {
+                if (differentCandidates.length !== 0 && !_.isEqual(differentCandidates, cellValue)) {
                     if (unitType === 'row') {
                         results.push({
                             row: unitIndexes.row,
@@ -384,8 +392,7 @@ function removeNakedsFromUnit(nakeds, unitValues, unitIndexes, unitType) {
 function removeNakeds(grid) {
 
     const results = [];
-    const clone = require('rfdc')();
-    const gridClone = clone(grid);
+    const gridClone = _.cloneDeep(grid);
 
     gridClone.forEach(function(rowValues, rowIndex) {
         const removeNakeds3 = removeNakedsFromUnit(findNakeds(3, rowValues), rowValues, { 'row': rowIndex }, 'row');
@@ -446,7 +453,7 @@ function removeNakeds(grid) {
         }
     }
 
-    return results;
+    return updateGrid(grid, results);
 
 }
 
@@ -616,8 +623,7 @@ function findXWings(grid) {
 
 function reduceCandidatesXWing(grid) {
 
-    const clone = require('rfdc')();
-    const gridClone = clone(grid);
+    const gridClone = _.cloneDeep(grid);
     const xWings = findXWings(gridClone);
     const results = [];
 
@@ -677,7 +683,7 @@ function reduceCandidatesXWing(grid) {
 
     });
 
-    return results;
+    return updateGrid(grid, results);
 
 }
 
@@ -699,8 +705,7 @@ function removeCandidateFromCell(grid, row, column, value) {
 
 function initReduceCandidates(grid) {
     const results = [];
-    const clone = require('rfdc')();
-    const gridClone = clone(grid);
+    const gridClone = _.cloneDeep(grid);
 
     for (let row = 0; row <= 6; row = row + 3) {
         for (let col = 0; col <= 6; col = col + 3) {
@@ -720,7 +725,7 @@ function initReduceCandidates(grid) {
             }
         }
     }
-    return results;
+    return updateGrid(grid, results);
 }
 
 function reduceCandidates(grid, row, column, direction) {
@@ -739,8 +744,8 @@ function reduceCandidates(grid, row, column, direction) {
     const nonetMainAxisSet1 = nonetValues.filter(function(value, index) {
         if (direction === 'row') {
             return index <= 2;
-        }
-        if (direction === 'column') {
+        } else {
+            // direction === 'column'
             return index === 0 || index === 3 || index === 6;
         }
     }).filter(function(value) {
@@ -750,8 +755,8 @@ function reduceCandidates(grid, row, column, direction) {
     const nonetMainAxisSet2 = nonetValues.filter(function(value, index) {
         if (direction === 'row') {
             return index >=3 && index <=5;
-        }
-        if (direction === 'column') {
+        } else {
+            // direction === 'column'
             return index === 1 || index === 4 || index === 7;
         }
     }).filter(function(value) {
@@ -761,8 +766,8 @@ function reduceCandidates(grid, row, column, direction) {
     const nonetMainAxisSet3 = nonetValues.filter(function(value, index) {
         if (direction === 'row') {
             return index >= 6;
-        }
-        if (direction === 'column') {
+        } else {
+            // direction === 'column'
             return index === 2 || index === 5 || index === 8;
         }
     }).filter(function(value) {
@@ -980,7 +985,7 @@ function setCandidates(grid) {
             }
         });
     });
-    return cellsWithCandidates;
+    return updateGrid(grid, cellsWithCandidates);
 }
 
 function solveCells(grid) {
@@ -995,7 +1000,9 @@ function solveCells(grid) {
             }
         });
     });
-    return solvedCells;
+    const updatedGrid = updateGrid(grid, solvedCells);
+
+    return setCandidates(updatedGrid);
 }
 
 function verifyCompletedGrid(grid) {
@@ -1039,4 +1046,4 @@ function verifyCompletedGrid(grid) {
 
 }
 
-export { solveNonets, removeNakeds, reduceCandidatesXWing, initReduceCandidates, solveCells, setCandidates, verifyCompletedGrid };
+export { solveCells, solveNonets, removeNakeds, reduceCandidatesXWing, initReduceCandidates, verifyCompletedGrid };

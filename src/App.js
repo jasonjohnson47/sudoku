@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import Grid from './Grid';
 import History from './History';
 import games from './games';
-import { solveNonets, removeNakeds, reduceCandidatesXWing, initReduceCandidates, solveCells, setCandidates, verifyCompletedGrid } from './logic';
+import { solveCells, solveNonets, removeNakeds, reduceCandidatesXWing, initReduceCandidates, verifyCompletedGrid } from './logic';
+import _ from 'lodash';
 
 function App() {
 
@@ -18,33 +19,34 @@ function App() {
     const [stepNumber, setStepNumber] = useState(
         Number(localStorage.getItem('sudokuStepNumber')) || 0
     );
+    const [isInGameMode, setIsInGameMode] = useState(true);
 
     useEffect(() => {
         localStorage.setItem('sudokuHistory', JSON.stringify(history));
         localStorage.setItem('sudokuStepNumber', stepNumber);
     }, [history, stepNumber]);
 
-    const clone = require('rfdc')();
-    const prevHistory = clone(history);
+    const prevHistory = _.cloneDeep(history);
     const addHistory = newHistory => setHistory([...prevHistory, newHistory]);
     const currentGridValues = history[stepNumber].grid;
 
     function onValueChange(values) {
-        addHistory({
-            grid: values
-        });
-        setStepNumber(history.length);
+        if (isInGameMode) {
+            addHistory({
+                grid: values
+            });
+            setStepNumber(history.length);
+        } else {
+            setHistory([{
+                grid: values
+            }]);
+        }
     }
 
-    function updateCells(cells) {
-        if (cells.length !== 0) {
-            //console.log(cells);
-            const newValues = currentGridValues;
-            cells.forEach(function(cell) {
-                newValues[cell.row][cell.column] = cell.value;
-            });
+    function updateGame(updatedGrid) {
+        if (!_.isEqual(updatedGrid, currentGridValues)) {
             addHistory({
-                grid: newValues
+                grid: updatedGrid
             });
             setStepNumber(history.length);
         }
@@ -79,29 +81,47 @@ function App() {
                     }>Medium</button>
                     <button onClick={() =>
                         {
+                            setHistory([{ grid: games.hard[getRandomInt(games.hard.length)] }]);
+                            setStepNumber(0);
+                        }
+                    }>Hard</button>
+                    <button onClick={() =>
+                        {
                             setHistory([{ grid: games.expert[getRandomInt(games.expert.length)] }]);
                             setStepNumber(0);
                         }
                     }>Expert</button>
                 </fieldset>
+                <fieldset>
+                    <legend>Get Help Solving</legend>
+                    <button onClick={ () => {
+                        updateGame(solveCells(currentGridValues));
+                    }}>Solve Cells</button>
+                    <button onClick={ () => {
+                        updateGame(solveNonets(currentGridValues));
+                    }}>Solve Nonets</button>
+                    <button onClick={ () => {
+                        updateGame(removeNakeds(currentGridValues));
+                    }}>Nakeds</button>
+                    <button onClick={ () => {
+                        updateGame(reduceCandidatesXWing(currentGridValues));
+                    }}>X-Wings</button>
+                    <button onClick={ () => {
+                        updateGame(initReduceCandidates(currentGridValues));
+                    }}>Reduce Candidates</button>
+                </fieldset>
                 <button onClick={ () => {
-                    updateCells(setCandidates(currentGridValues));
-                }}>Set Candidates</button>
+                    setHistory([{ grid: generateEmptyBoard() }]);
+                    setStepNumber(0);
+                    setIsInGameMode(false);
+                } }>Create Custom Game</button>
+
                 <button onClick={ () => {
-                    updateCells(solveCells(currentGridValues));
-                }}>Solve Cells</button>
-                <button onClick={ () => {
-                    updateCells(solveNonets(currentGridValues));
-                }}>Solve Nonets</button>
-                <button onClick={ () => {
-                    updateCells(removeNakeds(currentGridValues));
-                }}>Nakeds</button>
-                <button onClick={ () => {
-                    updateCells(reduceCandidatesXWing(currentGridValues));
-                }}>X-Wings</button>
-                <button onClick={ () => {
-                    updateCells(initReduceCandidates(currentGridValues));
-                }}>Reduce Candidates</button>
+                    setHistory([{ grid: currentGridValues }]);
+                    setStepNumber(0);
+                    setIsInGameMode(true);
+                } }>Start Game</button>
+
                 <button onClick={ () => {
                     verifyCompletedGrid(currentGridValues);
                 }}>Verify Completed Game</button>

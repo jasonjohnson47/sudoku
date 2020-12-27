@@ -14,7 +14,7 @@ function Grid(props) {
 
     function handleChange(coords, e) {
         const newValues = [...gridValues];
-        newValues[activeCell[0]][activeCell[1]] = e.target.value;
+        newValues[activeCell[0]][activeCell[1]] = Number(e.target.value);
         //setValues(newValues);
         props.onValueChange(newValues);
         ref.current.hideNumberPad();
@@ -32,7 +32,7 @@ function Grid(props) {
 
     function handleNumberPadButtonClick(e) {
         const newValues = [...gridValues];
-        newValues[activeCell[0]][activeCell[1]] = e.target.value;
+        newValues[activeCell[0]][activeCell[1]] = Number(e.target.value);
         //setValues(newValues);
         props.onValueChange(newValues);
         ref.current.hideNumberPad();
