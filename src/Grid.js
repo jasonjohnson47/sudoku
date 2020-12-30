@@ -15,7 +15,6 @@ function Grid(props) {
     function handleChange(coords, e) {
         const newValues = [...gridValues];
         newValues[activeCell[0]][activeCell[1]] = Number(e.target.value);
-        //setValues(newValues);
         props.onValueChange(newValues);
         ref.current.hideNumberPad();
     }
@@ -28,12 +27,12 @@ function Grid(props) {
         }
         setCellClicked(e.target);
         setActiveCell(coords);
+        e.target.select();
     }
 
     function handleNumberPadButtonClick(e) {
         const newValues = [...gridValues];
         newValues[activeCell[0]][activeCell[1]] = Number(e.target.value);
-        //setValues(newValues);
         props.onValueChange(newValues);
         ref.current.hideNumberPad();
     }
@@ -59,13 +58,14 @@ function Grid(props) {
                 value={gridValues[i][j]}
                 handleChange={handleChange}
                 handleClick={handleCellClick}
+                isGiven={Number.isInteger(props.givens[i][j])}
             />
         );
     }
 
     return (
         <div className="grid-wrapper">
-            <div id="grid">
+            <div id="grid" className={ props.showCandidates === true ? 'show-candidates' : 'hide-candidates' }>
                 {createGrid()}
             </div>
             <NumberPad

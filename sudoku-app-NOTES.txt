@@ -1,5 +1,5 @@
 Create a game
-- various levels of complexity: easy, medium, expert
+- various levels of complexity: easy, medium, hard, expert
 - predetermined boards, computer generated boards, via smartphone camera or picture import
 - user can manually enter numbers prior to starting puzzle
 
@@ -11,10 +11,9 @@ Play the game
 - button to solve entire puzzle
 
 Keep history of game play, one step for each solved cell
-Setting to be notified of incorrectly entered numbers
-Setting to show candidates
 Cache the current board via web storage
 Verify completed game when last number is filled in
+Add "Solve For Me" to the Number Pad or "Get Help Solving" section
 
 Game Panel
 ----------
@@ -27,3 +26,6 @@ Game Panel
 - SETTINGS
 --- Notify of incorrect numbers (checkbox)
 --- Show candidates (checkbox)
+--- Highlight givens (checkbox)
+--- Highlight squares that can be solved
+--- Show me the ones (twos, threes, etc.). Highlights squares with those numbers.

@@ -1046,4 +1046,4 @@ function verifyCompletedGrid(grid) {
 
 }
 
-export { solveCells, solveNonets, removeNakeds, reduceCandidatesXWing, initReduceCandidates, verifyCompletedGrid };
+export { setCandidates, solveCells, solveNonets, removeNakeds, reduceCandidatesXWing, initReduceCandidates, verifyCompletedGrid };
