@@ -14,9 +14,15 @@ function Grid(props) {
 
     function handleChange(coords, e) {
         const newValues = [...gridValues];
-        newValues[activeCell[0]][activeCell[1]] = Number(e.target.value);
-        props.onValueChange(newValues);
-        ref.current.hideNumberPad();
+        const singleIntRegEx = RegExp('[1-9]');
+
+        if (singleIntRegEx.test(e.target.value)) {
+            newValues[activeCell[0]][activeCell[1]] = Number(e.target.value);
+            props.onValueChange(newValues);
+            ref.current.hideNumberPad();
+        } else {
+            e.preventDefault()
+        }
     }
 
     function handleCellClick(coords, e) {
@@ -32,7 +38,12 @@ function Grid(props) {
 
     function handleNumberPadButtonClick(e) {
         const newValues = [...gridValues];
-        newValues[activeCell[0]][activeCell[1]] = Number(e.target.value);
+        
+        if (e.target.className === 'clear-button') {
+            newValues[activeCell[0]][activeCell[1]] = [];
+        } else {
+            newValues[activeCell[0]][activeCell[1]] = Number(e.target.value);
+        }
         props.onValueChange(newValues);
         ref.current.hideNumberPad();
     }
