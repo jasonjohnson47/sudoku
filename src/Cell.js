@@ -34,6 +34,7 @@ function Cell(props) {
                 pattern="[1-9]"
                 onChange={(e) => props.handleChange([row, column], e)}
                 onClick={(e) => props.handleClick([row, column], e)}
+                onKeyDown={(e) => props.handleKeyDown([row, column], e)}
                 {...inputAttrs}
             />
             {Array.isArray(value) && <div className="candidates">{candidates}</div>}

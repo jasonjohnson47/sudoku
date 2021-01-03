@@ -12,17 +12,28 @@ function Grid(props) {
     const [cellClicked, setCellClicked] = useState(null);
     const [activeCell, setActiveCell] = useState(null);
 
-    function handleChange(coords, e) {
+    function handleKeyDown(coords, e) {
         const newValues = [...gridValues];
         const singleIntRegEx = RegExp('[1-9]');
 
-        if (singleIntRegEx.test(e.target.value)) {
-            newValues[activeCell[0]][activeCell[1]] = Number(e.target.value);
-            props.onValueChange(newValues);
-            ref.current.hideNumberPad();
+        if (e.key === 'Backspace' || e.key === 'Delete') {
+            newValues[activeCell[0]][activeCell[1]] = [];
         } else {
-            e.preventDefault()
+            if (singleIntRegEx.test(e.target.value)) {
+                newValues[activeCell[0]][activeCell[1]] = Number(e.target.value);
+            } else {
+                e.preventDefault();
+            }
         }
+        props.onValueChange(newValues);
+        ref.current.hideNumberPad();
+    }
+
+    function handleChange(coords, e) {
+        const newValues = [...gridValues];
+        newValues[activeCell[0]][activeCell[1]] = Number(e.target.value);
+        props.onValueChange(newValues);
+        ref.current.hideNumberPad();
     }
 
     function handleCellClick(coords, e) {
@@ -69,6 +80,7 @@ function Grid(props) {
                 value={gridValues[i][j]}
                 handleChange={handleChange}
                 handleClick={handleCellClick}
+                handleKeyDown={handleKeyDown}
                 isGiven={Number.isInteger(props.givens[i][j])}
             />
         );

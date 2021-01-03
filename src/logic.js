@@ -1,5 +1,27 @@
 import _ from 'lodash';
 
+function getGridAnswers(grid) {
+    let completedGrid = [];
+    let solveGridSteps = 0;
+
+    function solveGrid(grid) {
+        solveGridSteps++;
+        if (verifyCompletedGrid(grid) === true) {
+            return;
+        } else if (solveGridSteps > 81) {
+            console.log('Cannot solve sudoku puzzle');
+            return;
+        } else {
+            completedGrid = solveCells(solveNonets(reduceCandidatesXWing(removeNakeds(initReduceCandidates(grid)))));
+            solveGrid(completedGrid);
+        }
+    }
+    solveGrid(grid);
+    return completedGrid;
+}
+
+
+
 function updateGrid(grid, updatedCells) {
     const updatedGrid = _.cloneDeep(grid);
     updatedCells.forEach(function(cell) {
@@ -1041,9 +1063,9 @@ function verifyCompletedGrid(grid) {
     });
 
     if (allRowsIncludeAllValues && allColumnsIncludeAllValues && allNonetsIncludeAllValues) {
-        alert('Sudoku completed successfully!');
+        return true;
     }
 
 }
 
-export { setCandidates, solveCells, solveNonets, removeNakeds, reduceCandidatesXWing, initReduceCandidates, verifyCompletedGrid };
+export { setCandidates, solveCells, solveNonets, removeNakeds, reduceCandidatesXWing, initReduceCandidates, verifyCompletedGrid, getGridAnswers };

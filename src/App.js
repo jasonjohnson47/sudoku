@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Grid from './Grid';
 import History from './History';
 import games from './games';
-import { setCandidates, solveCells, solveNonets, removeNakeds, reduceCandidatesXWing, initReduceCandidates, verifyCompletedGrid } from './logic';
+import { setCandidates, solveCells, solveNonets, removeNakeds, reduceCandidatesXWing, initReduceCandidates, verifyCompletedGrid, getGridAnswers } from './logic';
 import _ from 'lodash';
 
 function App() {
@@ -68,6 +68,12 @@ function App() {
         setIsInGameMode(true);
     }
 
+    function checkCompletedGrid(grid) {
+        if (verifyCompletedGrid(grid) === true) {
+            alert('sudoku game completed successfully!');
+        }
+    }
+
     return (
         <div className="App">
             <Grid values={currentGridValues} onValueChange={onValueChange} givens={history[0].grid} showCandidates={showCandidates} />
@@ -101,6 +107,9 @@ function App() {
                     <button onClick={ () => {
                         updateGame(initReduceCandidates(currentGridValues));
                     }}>Reduce Candidates</button>
+                    <button onClick={ () => {
+                        updateGame(getGridAnswers(currentGridValues));
+                    }}>Solve Grid 1 Step</button>
                 </fieldset>
                 <button onClick={ () => {
                     setHistory([{ grid: generateEmptyBoard() }]);
@@ -112,7 +121,7 @@ function App() {
                 }>Start Game</button>
 
                 <button onClick={ () => {
-                    verifyCompletedGrid(currentGridValues);
+                    checkCompletedGrid(currentGridValues);
                 }}>Verify Completed Game</button>
                 <h2>Settings</h2>
                 <button onClick={ () => {
