@@ -52,6 +52,8 @@ function Grid(props) {
         
         if (e.target.className === 'clear-button') {
             newValues[activeCell[0]][activeCell[1]] = [];
+        } else if (e.target.className === 'solve-button') {
+            newValues[activeCell[0]][activeCell[1]] = props.completedGrid[activeCell[0]][activeCell[1]];
         } else {
             newValues[activeCell[0]][activeCell[1]] = Number(e.target.value);
         }

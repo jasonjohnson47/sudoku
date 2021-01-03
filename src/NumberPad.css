@@ -40,7 +40,8 @@
     box-shadow: 0 0 0 1px #bbb;
 }
 
-.number-pad button.clear-button {
+.number-pad button.clear-button,
+.number-pad button.solve-button {
     grid-column-start: 1;
     grid-column-end: 4;
     width:auto;

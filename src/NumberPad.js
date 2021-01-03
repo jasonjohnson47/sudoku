@@ -3,17 +3,17 @@ import './NumberPad.css';
 
 function getNumberPadPosition(activeCell, numberPad) {
     const grid = document.getElementById('grid');
-    let gridRect = grid.getBoundingClientRect();
-    let gridTop = gridRect.top + document.body.scrollTop;
-    let cellBottom = activeCell.offsetHeight + activeCell.offsetTop + gridTop;
-    let numberPadBottom = cellBottom + numberPad.offsetHeight;
-    let numberPadWidth = numberPad.offsetWidth;
-    let numberPadLeft = activeCell.offsetLeft + (activeCell.offsetWidth/2) - numberPadWidth/2;
-    let numberPadRight = numberPadLeft + numberPadWidth;
-    let windowHeight = document.documentElement.clientHeight;
-    let windowWidth = document.documentElement.clientWidth;
+    const gridRect = grid.getBoundingClientRect();
+    const gridTop = gridRect.top + document.body.scrollTop;
+    const cellBottom = activeCell.offsetHeight + activeCell.offsetTop + gridTop;
+    const numberPadBottom = cellBottom + numberPad.offsetHeight;
+    const numberPadWidth = numberPad.offsetWidth;
+    const numberPadLeft = activeCell.offsetLeft + (activeCell.offsetWidth/2) - numberPadWidth/2;
+    const numberPadRight = numberPadLeft + numberPadWidth;
+    const windowHeight = document.documentElement.clientHeight;
+    const windowWidth = document.documentElement.clientWidth;
 
-    let positionStyles = {
+    const positionStyles = {
         top: activeCell ? activeCell.offsetTop + activeCell.offsetHeight : 0,
         bottom: 'auto',
         left: activeCell ? activeCell.offsetLeft + (activeCell.offsetWidth/2) - numberPadWidth/2 : 0,
@@ -114,7 +114,7 @@ const NumberPad = forwardRef((props, ref) => {
     }, [isActive, numberPadWidth, activeCell]);
 
     function createNumberButtons() {
-        let numberButtons = [];
+        const numberButtons = [];
     
         for (let i = 1; i < 10; i++) {
             numberButtons.push(<button type="button" value={i} key={`numpad-${i}`} onClick={props.handleClick}>{i}</button>);
@@ -123,13 +123,22 @@ const NumberPad = forwardRef((props, ref) => {
         return numberButtons;
     }
 
-    let clearButton = (
+    const clearButton = (
         <button
             type="button"
             value=""
             className="clear-button"
             onClick={props.handleClick}
         >Clear</button>
+    );
+
+    const solveButton = (
+        <button
+            type="button"
+            value=""
+            className="solve-button"
+            onClick={props.handleClick}
+        >Solve</button>
     );
         
     return (
@@ -139,7 +148,7 @@ const NumberPad = forwardRef((props, ref) => {
             ref={numberPadRef}
         >
             {createNumberButtons()}
-            { activeCell && activeCell.querySelector('input').value !== '' ? clearButton : null }
+            { activeCell && activeCell.querySelector('input').value !== '' ? clearButton : solveButton }
         </div>
     );
 

@@ -31,6 +31,7 @@ function App() {
     const prevHistory = _.cloneDeep(history);
     const addHistory = newHistory => setHistory([...prevHistory, newHistory]);
     const currentGridValues = history[stepNumber].grid;
+    const completedGrid = getGridAnswers(history[0].grid);
 
     function onValueChange(values) {
         if (isInGameMode) {
@@ -76,7 +77,7 @@ function App() {
 
     return (
         <div className="App">
-            <Grid values={currentGridValues} onValueChange={onValueChange} givens={history[0].grid} showCandidates={showCandidates} />
+            <Grid values={currentGridValues} onValueChange={onValueChange} givens={history[0].grid} showCandidates={showCandidates} completedGrid={completedGrid} />
             <div className="game-panel">
                 <h2>Controls</h2>
                 <fieldset>
@@ -108,7 +109,7 @@ function App() {
                         updateGame(initReduceCandidates(currentGridValues));
                     }}>Reduce Candidates</button>
                     <button onClick={ () => {
-                        updateGame(getGridAnswers(currentGridValues));
+                        updateGame(completedGrid);
                     }}>Solve Grid 1 Step</button>
                 </fieldset>
                 <button onClick={ () => {
