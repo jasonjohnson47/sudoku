@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Grid from './Grid';
 import History from './History';
 import games from './games';
-import { setCandidates, solveCells, solveNonets, removeNakeds, reduceCandidatesXWing, initReduceCandidates, verifyCompletedGrid, getGridAnswers } from './logic';
+import { setCandidates, solveCells, solveNonets, removeNakeds, reduceCandidatesXWing, initReduceCandidates, verifyCompletedGrid, getGridAnswers, getGridNextAnswers, getDiffOfCompletedCells } from './logic';
 import _ from 'lodash';
 
 function App() {
@@ -31,7 +31,10 @@ function App() {
     const prevHistory = _.cloneDeep(history);
     const addHistory = newHistory => setHistory([...prevHistory, newHistory]);
     const currentGridValues = history[stepNumber].grid;
+    const nextGridValues = getGridNextAnswers(currentGridValues);
+    const nextPossibleAnswers = getDiffOfCompletedCells(currentGridValues, nextGridValues);
     const completedGrid = getGridAnswers(history[0].grid);
+    
 
     function onValueChange(values) {
         if (isInGameMode) {
@@ -77,7 +80,7 @@ function App() {
 
     return (
         <div className="App">
-            <Grid values={currentGridValues} onValueChange={onValueChange} givens={history[0].grid} showCandidates={showCandidates} completedGrid={completedGrid} />
+            <Grid values={currentGridValues} onValueChange={onValueChange} givens={history[0].grid} showCandidates={showCandidates} nextPossibleAnswers={nextPossibleAnswers} completedGrid={completedGrid} />
             <div className="game-panel">
                 <h2>Controls</h2>
                 <fieldset>

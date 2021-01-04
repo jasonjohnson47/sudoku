@@ -1,5 +1,23 @@
 import _ from 'lodash';
 
+function getDiffOfCompletedCells(currentGrid, nextGrid) {
+    const result = nextGrid.map(function(row, i) {
+        const rowValues = row.map(function(value, j) {
+            if (Number.isInteger(value) && currentGrid[i][j] !== value) {
+                return value;
+            } else {
+                return [];
+            }
+        });
+        return rowValues;
+    });
+    return result;
+}
+
+function getGridNextAnswers(grid) {
+    return solveCells(solveNonets(reduceCandidatesXWing(removeNakeds(initReduceCandidates(grid)))));
+}
+
 function getGridAnswers(grid) {
     let completedGrid = [];
     let solveGridSteps = 0;
@@ -12,15 +30,13 @@ function getGridAnswers(grid) {
             console.log('Cannot solve sudoku puzzle');
             return;
         } else {
-            completedGrid = solveCells(solveNonets(reduceCandidatesXWing(removeNakeds(initReduceCandidates(grid)))));
+            completedGrid = getGridNextAnswers(grid);
             solveGrid(completedGrid);
         }
     }
     solveGrid(grid);
     return completedGrid;
 }
-
-
 
 function updateGrid(grid, updatedCells) {
     const updatedGrid = _.cloneDeep(grid);
@@ -1068,4 +1084,4 @@ function verifyCompletedGrid(grid) {
 
 }
 
-export { setCandidates, solveCells, solveNonets, removeNakeds, reduceCandidatesXWing, initReduceCandidates, verifyCompletedGrid, getGridAnswers };
+export { setCandidates, solveCells, solveNonets, removeNakeds, reduceCandidatesXWing, initReduceCandidates, verifyCompletedGrid, getGridNextAnswers, getGridAnswers, getDiffOfCompletedCells };

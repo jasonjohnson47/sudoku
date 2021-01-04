@@ -2,9 +2,9 @@ import React from 'react';
 
 function Cell(props) {
 
-    const {row, column, value, isGiven} = props;
+    const {row, column, value, isGiven, canBeSolved} = props;
     const inputAttrs = {};
-    const cellDivClassName = `cell cell-row-${row} cell-column-${column}${ isGiven === true ? ' given' : '' }`;
+    const cellDivClassName = `cell cell-row-${row} cell-column-${column}${ isGiven === true ? ' given' : '' }${ canBeSolved === true ? ' can-be-solved' : '' }`;
 
     // set 'value' attribute for cell input
     if (Array.isArray(value)) {

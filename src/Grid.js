@@ -84,6 +84,7 @@ function Grid(props) {
                 handleClick={handleCellClick}
                 handleKeyDown={handleKeyDown}
                 isGiven={Number.isInteger(props.givens[i][j])}
+                canBeSolved={Number.isInteger(props.nextPossibleAnswers[i][j])}
             />
         );
     }
