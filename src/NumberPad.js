@@ -148,7 +148,8 @@ const NumberPad = forwardRef((props, ref) => {
             ref={numberPadRef}
         >
             {createNumberButtons()}
-            { activeCell && activeCell.querySelector('input').value !== '' ? clearButton : solveButton }
+            { activeCell && activeCell.querySelector('input').value !== '' ? clearButton : null }
+            { activeCell && activeCell.classList.contains('can-be-solved') ? solveButton : null }
         </div>
     );
 

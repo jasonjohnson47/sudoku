@@ -16,17 +16,38 @@ function App() {
             grid: generateEmptyBoard()
         }]
     );
+
     const [stepNumber, setStepNumber] = useState(
         Number(localStorage.getItem('sudokuStepNumber')) || 0
     );
+
     const [isInGameMode, setIsInGameMode] = useState(true);
 
-    const [showCandidates, setShowCandidates] = useState(false);
+    const [showCandidates, setShowCandidates] = useState(
+        localStorage.getItem('sudokuShowCandidates')
+        ? JSON.parse(localStorage.getItem('sudokuShowCandidates'))
+        : false
+    );
+
+    const [highlightGivens, setHighlightGivens] = useState(
+        localStorage.getItem('sudokuHighlightGivens')
+        ? JSON.parse(localStorage.getItem('sudokuHighlightGivens'))
+        : true
+    );
+
+    const [highlightSolvableCells, setHighlightSolvableCells] = useState(
+        localStorage.getItem('sudokuHighlightSolvableCells')
+        ? JSON.parse(localStorage.getItem('sudokuHighlightSolvableCells'))
+        : true
+    );
 
     useEffect(() => {
         localStorage.setItem('sudokuHistory', JSON.stringify(history));
         localStorage.setItem('sudokuStepNumber', stepNumber);
-    }, [history, stepNumber]);
+        localStorage.setItem('sudokuShowCandidates', showCandidates);
+        localStorage.setItem('sudokuHighlightGivens', highlightGivens);
+        localStorage.setItem('sudokuHighlightSolvableCells', highlightSolvableCells);
+    }, [history, stepNumber, showCandidates, highlightGivens, highlightSolvableCells]);
 
     const prevHistory = _.cloneDeep(history);
     const addHistory = newHistory => setHistory([...prevHistory, newHistory]);
@@ -35,7 +56,6 @@ function App() {
     const nextPossibleAnswers = getDiffOfCompletedCells(currentGridValues, nextGridValues);
     const completedGrid = getGridAnswers(history[0].grid);
     
-
     function onValueChange(values) {
         if (isInGameMode) {
             addHistory({
@@ -80,7 +100,7 @@ function App() {
 
     return (
         <div className="App">
-            <Grid values={currentGridValues} onValueChange={onValueChange} givens={history[0].grid} showCandidates={showCandidates} nextPossibleAnswers={nextPossibleAnswers} completedGrid={completedGrid} />
+            <Grid values={currentGridValues} onValueChange={onValueChange} givens={history[0].grid} highlightGivens={highlightGivens} highlightSolvableCells={highlightSolvableCells} showCandidates={showCandidates} nextPossibleAnswers={nextPossibleAnswers} completedGrid={completedGrid} />
             <div className="game-panel">
                 <h2>Controls</h2>
                 <fieldset>
@@ -113,7 +133,7 @@ function App() {
                     }}>Reduce Candidates</button>
                     <button onClick={ () => {
                         updateGame(completedGrid);
-                    }}>Solve Grid 1 Step</button>
+                    }}>Solve Grid</button>
                 </fieldset>
                 <button onClick={ () => {
                     setHistory([{ grid: generateEmptyBoard() }]);
@@ -127,10 +147,28 @@ function App() {
                 <button onClick={ () => {
                     checkCompletedGrid(currentGridValues);
                 }}>Verify Completed Game</button>
+
                 <h2>Settings</h2>
-                <button onClick={ () => {
-                    showCandidates === true ? setShowCandidates(false) : setShowCandidates(true);
-                }}>{showCandidates === true ? 'Hide Candidates' : 'Show Candidates'}</button>
+
+                <div className="checkbox-group">
+                    <input type="checkbox" id="show-candidates" name="show-candidates" checked={showCandidates} onChange={ (e) => { 
+                        setShowCandidates(e.target.checked);
+                    }} />
+                    <label htmlFor="show-candidates">Show Candidates</label>
+                </div>
+                <div className="checkbox-group">
+                    <input type="checkbox" id="highlight-givens" name="highlight-givens" checked={highlightGivens} onChange={ (e) => { 
+                        setHighlightGivens(e.target.checked);
+                    }} />
+                    <label htmlFor="highlight-givens">Highlight Givens</label>
+                </div>
+                <div className="checkbox-group">
+                    <input type="checkbox" id="highlight-solvable" name="highlight-solvable" checked={highlightSolvableCells} onChange={ (e) => { 
+                        setHighlightSolvableCells(e.target.checked);
+                    }} />
+                    <label htmlFor="highlight-solvable">Highlight Solvable Cells</label>
+                </div>
+
             </div>
             <History history={history} jumpToStepInHistory={jumpToStepInHistory} currentStep={stepNumber} />
         </div>

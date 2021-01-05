@@ -6,9 +6,7 @@ import './Grid.css';
 function Grid(props) {
 
     const ref = useRef(null);
-
     const gridValues = props.values;
-
     const [cellClicked, setCellClicked] = useState(null);
     const [activeCell, setActiveCell] = useState(null);
 
@@ -89,9 +87,11 @@ function Grid(props) {
         );
     }
 
+    const gridClassName = `grid${props.showCandidates === false ? ' hide-candidates' : ''}${props.highlightGivens === true ? ' highlight-givens' : ''}${props.highlightSolvableCells === true ? ' highlight-solvable-cells' : ''}`;
+
     return (
         <div className="grid-wrapper">
-            <div id="grid" className={ props.showCandidates === true ? 'show-candidates' : 'hide-candidates' }>
+            <div id="grid" className={gridClassName}>
                 {createGrid()}
             </div>
             <NumberPad

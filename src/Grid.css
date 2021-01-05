@@ -23,10 +23,10 @@
     position: relative;
 }
 
-.given {
+.highlight-givens .given {
     background-color: #f3f3f3;
 }
-.can-be-solved {
+.highlight-solvable-cells .can-be-solved {
     background-color: #f5fff0;
     box-shadow: inset 0 0 0 1px #fff, inset 0 0 0 2px #b5ed98;
 }
