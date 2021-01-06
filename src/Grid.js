@@ -6,35 +6,13 @@ import './Grid.css';
 function Grid(props) {
 
     const ref = useRef(null);
-    const gridValues = props.values;
+    const {values, completedGrid, onValueChange, givens, nextPossibleAnswers, showCandidates, highlightGivens, highlightSolvableCells, highlightIncorrectCells} = props;
+    const gridValues = values;
     const [cellClicked, setCellClicked] = useState(null);
     const [activeCell, setActiveCell] = useState(null);
 
-    function handleKeyDown(coords, e) {
-        const newValues = [...gridValues];
-        const singleIntRegEx = RegExp('[1-9]');
-
-        if (e.key === 'Backspace' || e.key === 'Delete') {
-            newValues[activeCell[0]][activeCell[1]] = [];
-        } else {
-            if (singleIntRegEx.test(e.target.value)) {
-                newValues[activeCell[0]][activeCell[1]] = Number(e.target.value);
-            } else {
-                e.preventDefault();
-            }
-        }
-        props.onValueChange(newValues);
-        ref.current.hideNumberPad();
-    }
-
-    function handleChange(coords, e) {
-        const newValues = [...gridValues];
-        newValues[activeCell[0]][activeCell[1]] = Number(e.target.value);
-        props.onValueChange(newValues);
-        ref.current.hideNumberPad();
-    }
-
     function handleCellClick(coords, e) {
+        console.log(ref.current);
         if (cellClicked === e.target) {
             ref.current.isActive ? ref.current.hideNumberPad() : ref.current.showNumberPad();
         } else {
@@ -47,15 +25,42 @@ function Grid(props) {
 
     function handleNumberPadButtonClick(e) {
         const newValues = [...gridValues];
+        const row = activeCell[0];
+        const col = activeCell[1];
         
         if (e.target.className === 'clear-button') {
-            newValues[activeCell[0]][activeCell[1]] = [];
+            newValues[row][col] = [];
         } else if (e.target.className === 'solve-button') {
-            newValues[activeCell[0]][activeCell[1]] = props.completedGrid[activeCell[0]][activeCell[1]];
+            newValues[row][col] = completedGrid[row][col];
         } else {
-            newValues[activeCell[0]][activeCell[1]] = Number(e.target.value);
+            newValues[row][col] = Number(e.target.value);
         }
-        props.onValueChange(newValues);
+        onValueChange(newValues);
+        ref.current.hideNumberPad();
+    }
+
+    function handleKeyDown(coords, e) {
+        const newValues = [...gridValues];
+        const row = coords[0];
+        const col = coords[1];
+
+        if (e.key === 'Backspace' || e.key === 'Delete') {
+            newValues[row][col] = [];
+        } else if (RegExp('[1-9]').test(e.key)) {
+            newValues[row][col] = Number(e.key);
+        } else {
+            e.preventDefault();
+        }
+        onValueChange(newValues);
+        ref.current.hideNumberPad();
+    }
+
+    function handleChange(coords, e) {
+        const newValues = [...gridValues];
+        const row = coords[0];
+        const col = coords[1];
+        newValues[row][col] = Number(e.target.value);
+        onValueChange(newValues);
         ref.current.hideNumberPad();
     }
 
@@ -74,20 +79,21 @@ function Grid(props) {
     function renderCell(i, j) {
         return (
             <Cell
+                key={`r${i}c${j}`}
                 row={i}
                 column={j}
-                key={`r${i}c${j}`}
                 value={gridValues[i][j]}
                 handleChange={handleChange}
                 handleClick={handleCellClick}
                 handleKeyDown={handleKeyDown}
-                isGiven={Number.isInteger(props.givens[i][j])}
-                canBeSolved={Number.isInteger(props.nextPossibleAnswers[i][j])}
+                isGiven={Number.isInteger(givens[i][j])}
+                canBeSolved={Number.isInteger(nextPossibleAnswers[i][j])}
+                isIncorrect={ Number.isInteger(gridValues[i][j]) && gridValues[i][j] !== completedGrid[i][j] }
             />
         );
     }
 
-    const gridClassName = `grid${props.showCandidates === false ? ' hide-candidates' : ''}${props.highlightGivens === true ? ' highlight-givens' : ''}${props.highlightSolvableCells === true ? ' highlight-solvable-cells' : ''}`;
+    const gridClassName = `grid${showCandidates === false ? ' hide-candidates' : ''}${highlightGivens === true ? ' highlight-givens' : ''}${highlightSolvableCells === true ? ' highlight-solvable-cells' : ''}${highlightIncorrectCells === true ? ' highlight-incorrect-cells' : ''}`;
 
     return (
         <div className="grid-wrapper">

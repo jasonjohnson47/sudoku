@@ -41,13 +41,20 @@ function App() {
         : true
     );
 
+    const [highlightIncorrectCells, setHighlightIncorrectCells] = useState(
+        localStorage.getItem('sudokuHighlightIncorrectCells')
+        ? JSON.parse(localStorage.getItem('sudokuHighlightIncorrectCells'))
+        : true
+    );
+
     useEffect(() => {
         localStorage.setItem('sudokuHistory', JSON.stringify(history));
         localStorage.setItem('sudokuStepNumber', stepNumber);
         localStorage.setItem('sudokuShowCandidates', showCandidates);
         localStorage.setItem('sudokuHighlightGivens', highlightGivens);
         localStorage.setItem('sudokuHighlightSolvableCells', highlightSolvableCells);
-    }, [history, stepNumber, showCandidates, highlightGivens, highlightSolvableCells]);
+        localStorage.setItem('sudokuHighlightIncorrectCells', highlightIncorrectCells);
+    }, [history, stepNumber, showCandidates, highlightGivens, highlightSolvableCells, highlightIncorrectCells]);
 
     const prevHistory = _.cloneDeep(history);
     const addHistory = newHistory => setHistory([...prevHistory, newHistory]);
@@ -100,7 +107,17 @@ function App() {
 
     return (
         <div className="App">
-            <Grid values={currentGridValues} onValueChange={onValueChange} givens={history[0].grid} highlightGivens={highlightGivens} highlightSolvableCells={highlightSolvableCells} showCandidates={showCandidates} nextPossibleAnswers={nextPossibleAnswers} completedGrid={completedGrid} />
+            <Grid
+                values={currentGridValues}
+                onValueChange={onValueChange}
+                givens={history[0].grid}
+                highlightGivens={highlightGivens}
+                highlightSolvableCells={highlightSolvableCells}
+                highlightIncorrectCells={highlightIncorrectCells}
+                showCandidates={showCandidates}
+                nextPossibleAnswers={nextPossibleAnswers}
+                completedGrid={completedGrid}
+            />
             <div className="game-panel">
                 <h2>Controls</h2>
                 <fieldset>
@@ -167,6 +184,12 @@ function App() {
                         setHighlightSolvableCells(e.target.checked);
                     }} />
                     <label htmlFor="highlight-solvable">Highlight Solvable Cells</label>
+                </div>
+                <div className="checkbox-group">
+                    <input type="checkbox" id="highlight-incorrect-cells" name="highlight-incorrect-cells" checked={highlightIncorrectCells} onChange={ (e) => { 
+                        setHighlightIncorrectCells(e.target.checked);
+                    }} />
+                    <label htmlFor="highlight-incorrect-cells">Highlight Incorrect Cells</label>
                 </div>
 
             </div>

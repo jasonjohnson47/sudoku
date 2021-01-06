@@ -2,9 +2,9 @@ import React from 'react';
 
 function Cell(props) {
 
-    const {row, column, value, isGiven, canBeSolved} = props;
+    const {row, column, value, isGiven, canBeSolved, isIncorrect, handleChange, handleClick, handleKeyDown} = props;
     const inputAttrs = {};
-    const cellDivClassName = `cell cell-row-${row} cell-column-${column}${ isGiven === true ? ' given' : '' }${ canBeSolved === true ? ' can-be-solved' : '' }`;
+    const cellDivClassName = `cell cell-row-${row} cell-column-${column}${ isGiven === true ? ' given' : '' }${ canBeSolved === true ? ' can-be-solved' : '' }${ isIncorrect === true ? ' incorrect' : '' }`;
 
     // set 'value' attribute for cell input
     if (Array.isArray(value)) {
@@ -32,9 +32,9 @@ function Cell(props) {
                 type="text"
                 maxLength="1"
                 pattern="[1-9]"
-                onChange={(e) => props.handleChange([row, column], e)}
-                onClick={(e) => props.handleClick([row, column], e)}
-                onKeyDown={(e) => props.handleKeyDown([row, column], e)}
+                onChange={(e) => handleChange([row, column], e)}
+                onClick={(e) => handleClick([row, column], e)}
+                onKeyDown={(e) => handleKeyDown([row, column], e)}
                 {...inputAttrs}
             />
             {Array.isArray(value) && <div className="candidates">{candidates}</div>}
