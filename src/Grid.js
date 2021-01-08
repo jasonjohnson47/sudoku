@@ -12,7 +12,6 @@ function Grid(props) {
     const [activeCell, setActiveCell] = useState(null);
 
     function handleCellClick(coords, e) {
-        console.log(ref.current);
         if (cellClicked === e.target) {
             ref.current.isActive ? ref.current.hideNumberPad() : ref.current.showNumberPad();
         } else {
@@ -56,12 +55,13 @@ function Grid(props) {
     }
 
     function handleChange(coords, e) {
-        const newValues = [...gridValues];
+        // This isn't needed? But without 'onChange' on the Cell input React throws a warning in the console
+        /*const newValues = [...gridValues];
         const row = coords[0];
         const col = coords[1];
         newValues[row][col] = Number(e.target.value);
         onValueChange(newValues);
-        ref.current.hideNumberPad();
+        ref.current.hideNumberPad();*/
     }
 
     function createGrid() {
@@ -88,7 +88,7 @@ function Grid(props) {
                 handleKeyDown={handleKeyDown}
                 isGiven={Number.isInteger(givens[i][j])}
                 canBeSolved={Number.isInteger(nextPossibleAnswers[i][j])}
-                isIncorrect={ Number.isInteger(gridValues[i][j]) && gridValues[i][j] !== completedGrid[i][j] }
+                isIncorrect={ props.isInGameMode && (Number.isInteger(gridValues[i][j]) && gridValues[i][j] !== completedGrid[i][j]) }
             />
         );
     }

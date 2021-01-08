@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Grid from './Grid';
 import History from './History';
 import games from './games';
@@ -47,6 +47,27 @@ function App() {
         : true
     );
 
+    const prevHistory = _.cloneDeep(history);
+    const addHistory = newHistory => setHistory([...prevHistory, newHistory]);
+    const currentGridValues = history[stepNumber].grid;
+    const nextGridValues = getGridNextAnswers(currentGridValues);
+    const nextPossibleAnswers = getDiffOfCompletedCells(currentGridValues, nextGridValues);
+    let completedGrid = isInGameMode ? getGridAnswers(history[0].grid) : generateEmptyBoard();
+
+    const checkCompletedGridMemoizedCallback = useCallback(
+        (grid) => {
+            if (isGridFull(grid) === true) {
+                if (_.isEqual(grid, completedGrid)) {
+                    if (verifyCompletedGrid(grid) === true) {
+                        alert('Congrats! Sudoku game completed successfully!');
+                    }
+                } else {
+                    alert('Sorry, some numbers aren\'t where they should be.');
+                }
+            }
+        }, [completedGrid]
+    );
+
     useEffect(() => {
         localStorage.setItem('sudokuHistory', JSON.stringify(history));
         localStorage.setItem('sudokuStepNumber', stepNumber);
@@ -54,24 +75,18 @@ function App() {
         localStorage.setItem('sudokuHighlightGivens', highlightGivens);
         localStorage.setItem('sudokuHighlightSolvableCells', highlightSolvableCells);
         localStorage.setItem('sudokuHighlightIncorrectCells', highlightIncorrectCells);
-    }, [history, stepNumber, showCandidates, highlightGivens, highlightSolvableCells, highlightIncorrectCells]);
-
-    const prevHistory = _.cloneDeep(history);
-    const addHistory = newHistory => setHistory([...prevHistory, newHistory]);
-    const currentGridValues = history[stepNumber].grid;
-    const nextGridValues = getGridNextAnswers(currentGridValues);
-    const nextPossibleAnswers = getDiffOfCompletedCells(currentGridValues, nextGridValues);
-    const completedGrid = getGridAnswers(history[0].grid);
+        checkCompletedGridMemoizedCallback(currentGridValues);
+    }, [history, stepNumber, showCandidates, highlightGivens, highlightSolvableCells, highlightIncorrectCells, checkCompletedGridMemoizedCallback, currentGridValues]);
     
-    function onValueChange(values) {
+    function onValueChange(updatedGrid) {
         if (isInGameMode) {
             addHistory({
-                grid: values
+                grid: updatedGrid
             });
             setStepNumber(history.length);
         } else {
             setHistory([{
-                grid: values
+                grid: updatedGrid
             }]);
         }
     }
@@ -99,10 +114,9 @@ function App() {
         setIsInGameMode(true);
     }
 
-    function checkCompletedGrid(grid) {
-        if (verifyCompletedGrid(grid) === true) {
-            alert('sudoku game completed successfully!');
-        }
+    function isGridFull(currentGridValues) {
+        const currentGridValuesFlat = currentGridValues.flat();
+        return currentGridValuesFlat.every((value) => Number.isInteger(value));
     }
 
     return (
@@ -117,6 +131,7 @@ function App() {
                 showCandidates={showCandidates}
                 nextPossibleAnswers={nextPossibleAnswers}
                 completedGrid={completedGrid}
+                isInGameMode={isInGameMode}
             />
             <div className="game-panel">
                 <h2>Controls</h2>
@@ -160,10 +175,6 @@ function App() {
 
                 <button onClick={ () => { createNewGame(currentGridValues); }
                 }>Start Game</button>
-
-                <button onClick={ () => {
-                    checkCompletedGrid(currentGridValues);
-                }}>Verify Completed Game</button>
 
                 <h2>Settings</h2>
 
