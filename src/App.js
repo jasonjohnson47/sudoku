@@ -122,7 +122,8 @@ function App() {
     return (
         <div className="App">
             <Grid
-                values={currentGridValues}
+                currentGridValues={currentGridValues}
+                pastGridValues={stepNumber > 0 ? history[stepNumber - 1].grid : history[0].grid}
                 onValueChange={onValueChange}
                 givens={history[0].grid}
                 highlightGivens={highlightGivens}

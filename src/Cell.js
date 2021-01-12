@@ -32,6 +32,7 @@ function Cell(props) {
                 type="text"
                 maxLength="1"
                 pattern="[1-9]"
+                inputMode="none"
                 onChange={(e) => handleChange([row, column], e)}
                 onClick={(e) => handleClick([row, column], e)}
                 onKeyDown={(e) => handleKeyDown([row, column], e)}

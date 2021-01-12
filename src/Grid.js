@@ -1,13 +1,14 @@
 import React, { useState, useRef } from 'react';
 import Cell from './Cell';
 import NumberPad from './NumberPad';
+import {setCandidates} from './logic';
+import _ from 'lodash';
 import './Grid.css';
 
 function Grid(props) {
 
     const ref = useRef(null);
-    const {values, completedGrid, onValueChange, givens, nextPossibleAnswers, showCandidates, highlightGivens, highlightSolvableCells, highlightIncorrectCells} = props;
-    const gridValues = values;
+    const {currentGridValues, pastGridValues, completedGrid, onValueChange, givens, nextPossibleAnswers, showCandidates, highlightGivens, highlightSolvableCells, highlightIncorrectCells} = props;
     const [cellClicked, setCellClicked] = useState(null);
     const [activeCell, setActiveCell] = useState(null);
 
@@ -23,44 +24,60 @@ function Grid(props) {
     }
 
     function handleNumberPadButtonClick(e) {
-        const newValues = [...gridValues];
+        const newGridValues = _.cloneDeep(currentGridValues);
         const row = activeCell[0];
         const col = activeCell[1];
         
         if (e.target.className === 'clear-button') {
-            newValues[row][col] = [];
+            newGridValues[row][col] = pastGridValues[row][col];
         } else if (e.target.className === 'solve-button') {
-            newValues[row][col] = completedGrid[row][col];
+            newGridValues[row][col] = completedGrid[row][col];
         } else {
-            newValues[row][col] = Number(e.target.value);
+            newGridValues[row][col] = Number(e.target.value);
         }
-        onValueChange(newValues);
+
+        const isCorrect = newGridValues[row][col] === completedGrid[row][col];
+
+        if (isCorrect) {
+            onValueChange(setCandidates(newGridValues));
+        } else {
+            onValueChange(newGridValues);
+        }
+        
         ref.current.hideNumberPad();
     }
 
     function handleKeyDown(coords, e) {
-        const newValues = [...gridValues];
+        const newGridValues = _.cloneDeep(currentGridValues);
         const row = coords[0];
         const col = coords[1];
 
         if (e.key === 'Backspace' || e.key === 'Delete') {
-            newValues[row][col] = [];
+            newGridValues[row][col] = [];
         } else if (RegExp('[1-9]').test(e.key)) {
-            newValues[row][col] = Number(e.key);
+            newGridValues[row][col] = Number(e.key);
         } else {
             e.preventDefault();
         }
-        onValueChange(newValues);
+
+        const isCorrect = newGridValues[row][col] === completedGrid[row][col];
+
+        if (isCorrect) {
+            onValueChange(setCandidates(newGridValues));
+        } else {
+            onValueChange(newGridValues);
+        }
+
         ref.current.hideNumberPad();
     }
 
     function handleChange(coords, e) {
         // This isn't needed? But without 'onChange' on the Cell input React throws a warning in the console
-        /*const newValues = [...gridValues];
+        /*const newGridValues = _.cloneDeep(currentGridValues);
         const row = coords[0];
         const col = coords[1];
-        newValues[row][col] = Number(e.target.value);
-        onValueChange(newValues);
+        newGridValues[row][col] = Number(e.target.value);
+        onValueChange(newGridValues);
         ref.current.hideNumberPad();*/
     }
 
@@ -82,13 +99,13 @@ function Grid(props) {
                 key={`r${i}c${j}`}
                 row={i}
                 column={j}
-                value={gridValues[i][j]}
+                value={currentGridValues[i][j]}
                 handleChange={handleChange}
                 handleClick={handleCellClick}
                 handleKeyDown={handleKeyDown}
                 isGiven={Number.isInteger(givens[i][j])}
                 canBeSolved={Number.isInteger(nextPossibleAnswers[i][j])}
-                isIncorrect={ props.isInGameMode && (Number.isInteger(gridValues[i][j]) && gridValues[i][j] !== completedGrid[i][j]) }
+                isIncorrect={ props.isInGameMode && (Number.isInteger(currentGridValues[i][j]) && currentGridValues[i][j] !== completedGrid[i][j]) }
             />
         );
     }
