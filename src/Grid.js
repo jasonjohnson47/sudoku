@@ -8,7 +8,7 @@ import './Grid.css';
 function Grid(props) {
 
     const ref = useRef(null);
-    const {currentGridValues, pastGridValues, completedGrid, onValueChange, givens, nextPossibleAnswers, showCandidates, highlightGivens, highlightSolvableCells, highlightIncorrectCells} = props;
+    const {currentGridValues, pastGridValues, completedGrid, updateGame, givens, nextPossibleAnswers, showCandidates, highlightGivens, highlightSolvableCells, highlightIncorrectCells} = props;
     const [cellClicked, setCellClicked] = useState(null);
     const [activeCell, setActiveCell] = useState(null);
 
@@ -39,9 +39,9 @@ function Grid(props) {
         const isCorrect = newGridValues[row][col] === completedGrid[row][col];
 
         if (isCorrect) {
-            onValueChange(setCandidates(newGridValues));
+            updateGame(setCandidates(newGridValues));
         } else {
-            onValueChange(newGridValues);
+            updateGame(newGridValues);
         }
         
         ref.current.hideNumberPad();
@@ -63,9 +63,9 @@ function Grid(props) {
         const isCorrect = newGridValues[row][col] === completedGrid[row][col];
 
         if (isCorrect) {
-            onValueChange(setCandidates(newGridValues));
+            updateGame(setCandidates(newGridValues));
         } else {
-            onValueChange(newGridValues);
+            updateGame(newGridValues);
         }
 
         ref.current.hideNumberPad();
@@ -77,7 +77,7 @@ function Grid(props) {
         const row = coords[0];
         const col = coords[1];
         newGridValues[row][col] = Number(e.target.value);
-        onValueChange(newGridValues);
+        updateGame(newGridValues);
         ref.current.hideNumberPad();*/
     }
 

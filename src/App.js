@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import Dropdown from 'react-bootstrap/Dropdown';
 import Grid from './Grid';
+import NewGamePanel from './NewGamePanel';
+import GameSettingsPanel from './GameSettingsPanel';
 import History from './History';
-import games from './games';
-import { setCandidates, solveCells, solveNonets, removeNakeds, reduceCandidatesXWing, initReduceCandidates, verifyCompletedGrid, getGridAnswers, getGridNextAnswers, getDiffOfCompletedCells } from './logic';
+import { setCandidates, verifyCompletedGrid, getGridAnswers, getGridNextAnswers, getDiffOfCompletedCells } from './logic';
 import _ from 'lodash';
 
 function App() {
@@ -47,6 +49,12 @@ function App() {
         : true
     );
 
+    const [menuIsOpen, setMenuIsOpen] = useState(false);
+
+    function toggleMenu() {
+        setMenuIsOpen(!menuIsOpen);
+    }
+
     const prevHistory = _.cloneDeep(history);
     const addHistory = newHistory => setHistory([...prevHistory, newHistory]);
     const currentGridValues = history[stepNumber].grid;
@@ -78,7 +86,7 @@ function App() {
         checkCompletedGridMemoizedCallback(currentGridValues);
     }, [history, stepNumber, showCandidates, highlightGivens, highlightSolvableCells, highlightIncorrectCells, checkCompletedGridMemoizedCallback, currentGridValues]);
     
-    function onValueChange(updatedGrid) {
+    function updateGame(updatedGrid) {
         if (isInGameMode) {
             addHistory({
                 grid: updatedGrid
@@ -91,21 +99,14 @@ function App() {
         }
     }
 
-    function updateGame(updatedGrid) {
-        if (!_.isEqual(updatedGrid, currentGridValues)) {
-            addHistory({
-                grid: updatedGrid
-            });
-            setStepNumber(history.length);
-        }
-    }
-
     function jumpToStepInHistory(step) {
         setStepNumber(step);
     }
 
-    function getRandomInt(max) {
-        return Math.floor(Math.random() * Math.floor(max));
+    function createCustomGame() {
+        setHistory([{ grid: generateEmptyBoard() }]);
+        setStepNumber(0);
+        setIsInGameMode(false);
     }
 
     function createNewGame(initialGrid) {
@@ -121,10 +122,55 @@ function App() {
 
     return (
         <div className="App">
+            <Dropdown id="dropdown-game-menu" className="text-right" show={menuIsOpen}>
+                <Dropdown.Toggle variant="primary" id="game-menu" onClick={() => { toggleMenu() }}>
+                    <span className="sr-only">Menu</span>
+                    <span className="navbar-toggler-icon"></span>
+                </Dropdown.Toggle>
+                <Dropdown.Menu className="p-4">
+                    <h2>Start a New Game</h2>
+                    <NewGamePanel
+                        createNewGame={createNewGame}
+                        createCustomGame={createCustomGame}
+                        toggleMenu={toggleMenu}
+                    />
+                    <Dropdown.Divider />
+                    <h2>Settings</h2>
+                    <GameSettingsPanel
+                        showCandidates={showCandidates}
+                        setShowCandidates={setShowCandidates}
+                        highlightGivens={highlightGivens}
+                        setHighlightGivens={setHighlightGivens}
+                        highlightSolvableCells={highlightSolvableCells}
+                        setHighlightSolvableCells={setHighlightSolvableCells}
+                        highlightIncorrectCells={highlightIncorrectCells}
+                        setHighlightIncorrectCells={setHighlightIncorrectCells}
+                    />
+                    <Dropdown.Divider />
+                    <button className="btn btn-block btn-primary" onClick={() => {
+                        toggleMenu();
+                        updateGame(completedGrid);
+                    }}>
+                        Solve Puzzle
+                    </button>
+                </Dropdown.Menu>
+            </Dropdown>
+
+            <div className={isInGameMode === true ? "custom-game-instructions d-none" : "custom-game-instructions"}>
+                <p>Enter your starting numbers ("givens") in the cells to create your own game. When you have finished entering all the givens, click "Start Game" to start solving the puzzle.</p>
+                <button className="btn btn-primary" onClick={() => { createNewGame(currentGridValues) }}>
+                    Start Game
+                </button>
+            </div>
+
             <Grid
                 currentGridValues={currentGridValues}
-                pastGridValues={stepNumber > 0 ? history[stepNumber - 1].grid : history[0].grid}
-                onValueChange={onValueChange}
+                pastGridValues={
+                    stepNumber > 0
+                        ? history[stepNumber - 1].grid
+                        : history[0].grid
+                }
+                updateGame={updateGame}
                 givens={history[0].grid}
                 highlightGivens={highlightGivens}
                 highlightSolvableCells={highlightSolvableCells}
@@ -134,78 +180,13 @@ function App() {
                 completedGrid={completedGrid}
                 isInGameMode={isInGameMode}
             />
-            <div className="game-panel">
-                <h2>Controls</h2>
-                <fieldset>
-                    <legend>Generate Game</legend>
-                    <button onClick={() => { createNewGame(games.easy[getRandomInt(games.easy.length)]); }
-                    }>Easy</button>
-                    <button onClick={() => { createNewGame(games.medium[getRandomInt(games.medium.length)]); }
-                    }>Medium</button>
-                    <button onClick={() => { createNewGame(games.hard[getRandomInt(games.hard.length)]); }
-                    }>Hard</button>
-                    <button onClick={() => { createNewGame(games.expert[getRandomInt(games.expert.length)]); }
-                    }>Expert</button>
-                </fieldset>
-                <fieldset>
-                    <legend>Get Help Solving</legend>
-                    <button onClick={ () => {
-                        updateGame(solveCells(currentGridValues));
-                    }}>Solve Cells</button>
-                    <button onClick={ () => {
-                        updateGame(solveNonets(currentGridValues));
-                    }}>Solve Nonets</button>
-                    <button onClick={ () => {
-                        updateGame(removeNakeds(currentGridValues));
-                    }}>Nakeds</button>
-                    <button onClick={ () => {
-                        updateGame(reduceCandidatesXWing(currentGridValues));
-                    }}>X-Wings</button>
-                    <button onClick={ () => {
-                        updateGame(initReduceCandidates(currentGridValues));
-                    }}>Reduce Candidates</button>
-                    <button onClick={ () => {
-                        updateGame(completedGrid);
-                    }}>Solve Grid</button>
-                </fieldset>
-                <button onClick={ () => {
-                    setHistory([{ grid: generateEmptyBoard() }]);
-                    setStepNumber(0);
-                    setIsInGameMode(false);
-                } }>Create Custom Game</button>
-
-                <button onClick={ () => { createNewGame(currentGridValues); }
-                }>Start Game</button>
-
-                <h2>Settings</h2>
-
-                <div className="checkbox-group">
-                    <input type="checkbox" id="show-candidates" name="show-candidates" checked={showCandidates} onChange={ (e) => { 
-                        setShowCandidates(e.target.checked);
-                    }} />
-                    <label htmlFor="show-candidates">Show Candidates</label>
-                </div>
-                <div className="checkbox-group">
-                    <input type="checkbox" id="highlight-givens" name="highlight-givens" checked={highlightGivens} onChange={ (e) => { 
-                        setHighlightGivens(e.target.checked);
-                    }} />
-                    <label htmlFor="highlight-givens">Highlight Givens</label>
-                </div>
-                <div className="checkbox-group">
-                    <input type="checkbox" id="highlight-solvable" name="highlight-solvable" checked={highlightSolvableCells} onChange={ (e) => { 
-                        setHighlightSolvableCells(e.target.checked);
-                    }} />
-                    <label htmlFor="highlight-solvable">Highlight Solvable Cells</label>
-                </div>
-                <div className="checkbox-group">
-                    <input type="checkbox" id="highlight-incorrect-cells" name="highlight-incorrect-cells" checked={highlightIncorrectCells} onChange={ (e) => { 
-                        setHighlightIncorrectCells(e.target.checked);
-                    }} />
-                    <label htmlFor="highlight-incorrect-cells">Highlight Incorrect Cells</label>
-                </div>
-
-            </div>
-            <History history={history} jumpToStepInHistory={jumpToStepInHistory} currentStep={stepNumber} />
+            
+            <h2>Game History</h2>
+            <History
+                history={history}
+                jumpToStepInHistory={jumpToStepInHistory}
+                currentStep={stepNumber}
+            />
         </div>
     );
 }
