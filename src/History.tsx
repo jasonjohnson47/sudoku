@@ -1,7 +1,18 @@
-import React from 'react';
 import './History.css';
 
-function History(props) {
+type GridArr = (number | number[])[][];
+
+interface HistoryObj {
+    grid: GridArr;
+}
+
+interface HistoryProps {
+    history: HistoryObj[];
+    jumpToStepInHistory: (step:number) => void;
+    currentStep: number;
+}
+
+function History(props: HistoryProps) {
 
     const currentStep = props.currentStep;
     const historyLength = props.history.length;

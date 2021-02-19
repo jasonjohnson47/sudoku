@@ -1,6 +1,23 @@
 import _ from 'lodash';
 
-function getDiffOfCompletedCells(currentGrid, nextGrid) {
+type UnitArr = (number | number[])[];
+type GridArr = UnitArr[];
+type UnitTypes = 'row' | 'column' | 'nonet';
+type CellCoords = [number, number];
+
+interface CellObj {
+    row: number;
+    column: number;
+    value: number | number[];
+}
+
+interface XWingObj {
+    axis: 'row' | 'column';
+    positions: CellCoords[];
+    value: number
+}
+
+function getDiffOfCompletedCells(currentGrid: GridArr, nextGrid: GridArr) {
     const result = nextGrid.map(function(row, i) {
         const rowValues = row.map(function(value, j) {
             if (Number.isInteger(value) && currentGrid[i][j] !== value) {
@@ -14,15 +31,15 @@ function getDiffOfCompletedCells(currentGrid, nextGrid) {
     return result;
 }
 
-function getGridNextAnswers(grid) {
+function getGridNextAnswers(grid: GridArr) {
     return solveCells(solveNonets(reduceCandidatesXWing(removeNakeds(initReduceCandidates(grid)))));
 }
 
-function getGridAnswers(grid) {
-    let completedGrid = [];
+function getGridAnswers(grid: GridArr) {
+    let completedGrid: GridArr = [];
     let solveGridSteps = 0;
 
-    function solveGrid(grid) {
+    function solveGrid(grid: GridArr) {
         solveGridSteps++;
         if (verifyCompletedGrid(grid) === true) {
             return;
@@ -38,16 +55,16 @@ function getGridAnswers(grid) {
     return completedGrid;
 }
 
-function updateGrid(grid, updatedCells) {
+function updateGrid(grid: GridArr, updatedCells: CellObj[]) {
     const updatedGrid = _.cloneDeep(grid);
-    updatedCells.forEach(function(cell) {
+    updatedCells.forEach(function(cell: CellObj) {
         updatedGrid[cell.row][cell.column] = cell.value;
     });
     return updatedGrid;
 }
 
-function generateNonet(grid, topLeftCellRow, topLeftCellCol) {
-    let nonet = [];
+function generateNonet(grid: GridArr, topLeftCellRow: number, topLeftCellCol: number) {
+    let nonet: UnitArr = [];
 
     for (let i = topLeftCellRow; i < topLeftCellRow + 3; i++) {
         for (let j = topLeftCellCol; j < topLeftCellCol + 3; j++) {
@@ -58,27 +75,27 @@ function generateNonet(grid, topLeftCellRow, topLeftCellCol) {
     return nonet;
 }
 
-function getCellValue(grid, row, column) {
+function getCellValue(grid: GridArr, row: number, column: number) {
     return grid[row][column];
 }
 
-function getRowValues(grid, row) {
-    let rowValues = [];
+function getRowValues(grid: GridArr, row: number) {
+    let rowValues: UnitArr = [];
     grid[row].forEach(function(value) {
         rowValues.push(value);
     });
     return rowValues;
 }
 
-function getColumnValues(grid, column) {
-    let columnValues = [];
+function getColumnValues(grid: GridArr, column: number) {
+    let columnValues: UnitArr = [];
     grid.forEach(function(row) {
         columnValues.push(row[column]);
     });
     return columnValues;
 }
 
-function getNonetValues(grid, row, column) {
+function getNonetValues(grid: GridArr, row: number, column: number) {
 
     // sqr1
     if (row <= 2 && column <= 2) {
@@ -121,21 +138,18 @@ function getNonetValues(grid, row, column) {
     }
 
     // sqr9
-    if (row >= 6 && column >= 6) {
-        return generateNonet(grid, 6,6);
-    }
+    // row >= 6 && column >= 6
+    return generateNonet(grid, 6,6);
+
 }
 
-function getNonetRowsCols(rowOrCol) {
-    let rowOrCol1,
-        rowOrCol2,
-        rowOrCol3;
+function getNonetRowsCols(rowOrCol: number) {
 
-    if (rowOrCol === 0 || rowOrCol === 3 || rowOrCol === 6) {
-        rowOrCol1 = rowOrCol;
-        rowOrCol2 = rowOrCol + 1;
+    // rowOrCol === 0 || rowOrCol === 3 || rowOrCol === 6
+    let rowOrCol1 = rowOrCol,
+        rowOrCol2 = rowOrCol + 1,
         rowOrCol3 = rowOrCol + 2;
-    }
+
     if (rowOrCol === 1 || rowOrCol === 4 || rowOrCol === 7) {
         rowOrCol1 = rowOrCol - 1;
         rowOrCol2 = rowOrCol;
@@ -150,13 +164,13 @@ function getNonetRowsCols(rowOrCol) {
     return [rowOrCol1, rowOrCol2, rowOrCol3];
 }
 
-function isCellSolved (grid, row, column) {
+function isCellSolved (grid: GridArr, row: number, column: number) {
     if (typeof grid[row][column] === 'number') {
         return true;
     }
 }
 
-function isCleanValue(value) {
+function isCleanValue(value: number | number[]) {
     // check if the value is an empty array
     if (Array.isArray(value) && value.length === 0) {
         return true;
@@ -165,19 +179,19 @@ function isCleanValue(value) {
     }
 }
 
-function crosshatchNonet (grid, row, column) {
+function crosshatchNonet (grid: GridArr, row: number, column: number) {
 
     const nonetValues = getNonetValues(grid, row, column);
     const candidates = [1,2,3,4,5,6,7,8,9].filter(function(value) {
         return !(nonetValues.includes(value));
     });
-    let newCandidates = [];
+    let newCandidates: number[][] = [];
     const nonetRows = getNonetRowsCols(row);
     const nonetColumns = getNonetRowsCols(column);
 
     candidates.forEach(function(candidate) {
 
-        const temporaryNonetValues = nonetValues.map(function(value) {
+        const temporaryNonetValues: (number | 'o' | 'x')[] = nonetValues.map(function(value) {
             if (Array.isArray(value)) {
                 return "o";
             } else {
@@ -195,9 +209,8 @@ function crosshatchNonet (grid, row, column) {
             if (index >=3 && index <=5) {
                 nonetRowValues = getRowValues(grid, nonetRows[1]);
             }
-            if (index >= 6) {
-                nonetRowValues = getRowValues(grid, nonetRows[2]);
-            }
+            // index >= 6
+            nonetRowValues = getRowValues(grid, nonetRows[2]);
 
             if (index === 0 || index === 3 || index === 6) {
                 nonetColumnValues = getColumnValues(grid, nonetColumns[0]);
@@ -205,9 +218,9 @@ function crosshatchNonet (grid, row, column) {
             if (index === 1 || index === 4 || index === 7) {
                 nonetColumnValues = getColumnValues(grid, nonetColumns[1]);
             }
-            if (index === 2 || index === 5 || index === 8) {
-                nonetColumnValues = getColumnValues(grid, nonetColumns[2]);
-            }
+            // index === 2 || index === 5 || index === 8
+            nonetColumnValues = getColumnValues(grid, nonetColumns[2]);
+            
 
             if (value === 'o') {
                 if (nonetRowValues.includes(candidate)) {
@@ -228,7 +241,7 @@ function crosshatchNonet (grid, row, column) {
             }
         });
 
-        const gridCell = nonetValuesArrayIndexToGridCell(temporaryNonetValues.indexOf('o'), row, column);
+        const gridCell: CellCoords = nonetValuesArrayIndexToGridCell(temporaryNonetValues.indexOf('o'), row, column);
 
         if (emptyCount === 1) {
             newCandidates.push([gridCell[0], gridCell[1], candidate]);
@@ -246,7 +259,7 @@ function crosshatchNonet (grid, row, column) {
 
 }
 
-function nonetValuesArrayIndexToGridCell(nonetValuesIndex, nonetTopLeftSqRow, nonetTopLeftSqCol) {
+function nonetValuesArrayIndexToGridCell(nonetValuesIndex: number, nonetTopLeftSqRow: number, nonetTopLeftSqCol: number): CellCoords {
     let gridCellRow = nonetTopLeftSqRow;
     let gridCellCol = nonetTopLeftSqCol;
 
@@ -282,7 +295,7 @@ function nonetValuesArrayIndexToGridCell(nonetValuesIndex, nonetTopLeftSqRow, no
     return [gridCellRow, gridCellCol];
 }
 
-function solveNonets(grid) {
+function solveNonets(grid: GridArr) {
     const solvedCells = [];
     for (let row = 0; row <= 6; row = row + 3) {
         for (let col = 0; col <= 6; col = col + 3) {
@@ -297,13 +310,13 @@ function solveNonets(grid) {
     return setCandidates(updatedGrid);
 }
 
-function getCandidates(grid, row, column) {
+function getCandidates(grid: GridArr, row: number, column: number) {
 
     const allValues = Array.from(new Set(getNonetValues(grid, row, column).concat(getRowValues(grid, row)).concat(getColumnValues(grid, column)))).filter(function(value) {
         return typeof value === 'number' || (Array.isArray(value) && value.length !== 0);
     });
 
-    let startingCandidates;
+    let startingCandidates: number | number[];
 
     if (isCleanValue(grid[row][column])) {
         startingCandidates = [1,2,3,4,5,6,7,8,9];
@@ -311,9 +324,15 @@ function getCandidates(grid, row, column) {
         startingCandidates = grid[row][column];
     }
     
-    const candidates = startingCandidates.filter(function(value) {
-        return !(allValues.includes(value));
-    });
+    let candidates: number | number[];
+
+    if (Array.isArray(startingCandidates)) {
+        candidates = startingCandidates.filter(function(value) {
+            return !(allValues.includes(value));
+        })
+    } else {
+        candidates = startingCandidates;
+    }
 
     return candidates;
 
@@ -332,22 +351,22 @@ all other appearances of the same candidates can be eliminated if they are in th
 
 */
 
-function findNakeds(quantity, unitValues) {
+function findNakeds(quantity: number, unitValues: UnitArr) {
 
-    let tempUnitValues = unitValues.slice(0);
+    let tempUnitValues: UnitArr = unitValues.slice(0);
     let cellsWithSameCandidates = 0;
-    let result = [];
+    let result: number[] = [];
 
-    function findNakedsStep(arrayOfValues) {
+    function findNakedsStep(arrayOfValues: UnitArr) {
 
         const cellsWithCandidates = arrayOfValues.filter(function(value) {
             return Array.isArray(value);
         });
-        let lastGoodValue = [];
+        let lastGoodValue: number[] = [];
         let cellsToExcludeCount = 0;
         cellsWithSameCandidates = 0;
 
-        result = arrayOfValues.reduce(function(accumulator, currentValue, currentIndex) {
+        result = arrayOfValues.reduce(function(accumulator: number[], currentValue) {
 
             if (Array.isArray(currentValue)) {
 
@@ -382,12 +401,21 @@ function findNakeds(quantity, unitValues) {
 
 }
 
-function removeNakedsFromUnit(nakeds, unitValues, unitIndexes, unitType) {
+//findNakeds(3, rowValues), rowValues, { 'row': rowIndex }, 'row'
+//findNakeds(4, columnValues), columnValues, { 'column': columnIndex }, 'column'
+//findNakeds(3, nonetValues), nonetValues, { 'row': rowIndex,'column': columnIndex }, 'nonet'
 
-    const results = [];
+interface UnitIndexesObj {
+    row?: number;
+    column?: number;
+}
+
+function removeNakedsFromUnit(nakeds: number[] | undefined, unitValues: UnitArr, unitIndexes: UnitIndexesObj, unitType: UnitTypes) {
+
+    const results: CellObj[] = [];
 
     if (nakeds) {
-        unitValues.forEach(function(cellValue, index) {
+        unitValues.forEach(function(cellValue: number | number[], index: number) {
             if (Array.isArray(cellValue)) {
                 const differentCandidates = cellValue.filter(function(value) {
                     return !nakeds.includes(value);
@@ -396,7 +424,7 @@ function removeNakedsFromUnit(nakeds, unitValues, unitIndexes, unitType) {
                 if (differentCandidates.length !== 0 && !_.isEqual(differentCandidates, cellValue)) {
                     if (unitType === 'row') {
                         results.push({
-                            row: unitIndexes.row,
+                            row: unitIndexes.row as number,
                             column: index,
                             value: differentCandidates
                         });
@@ -404,12 +432,12 @@ function removeNakedsFromUnit(nakeds, unitValues, unitIndexes, unitType) {
                     if (unitType === 'column') {
                         results.push({
                             row: index,
-                            column: unitIndexes.column,
+                            column: unitIndexes.column as number,
                             value: differentCandidates
                         });
                     }
                     if (unitType === 'nonet') {
-                        const gridCell = nonetValuesArrayIndexToGridCell(index, unitIndexes.row, unitIndexes.column);
+                        const gridCell = nonetValuesArrayIndexToGridCell(index, unitIndexes.row as number, unitIndexes.column as number);
                         results.push({
                             row: gridCell[0],
                             column: gridCell[1],
@@ -427,7 +455,7 @@ function removeNakedsFromUnit(nakeds, unitValues, unitIndexes, unitType) {
 
 }
 
-function removeNakeds(grid) {
+function removeNakeds(grid: GridArr) {
 
     const results = [];
     const gridClone = _.cloneDeep(grid);
@@ -438,13 +466,13 @@ function removeNakeds(grid) {
 
         if (removeNakeds3 !== undefined) {
             results.push(...removeNakeds3);
-            removeNakeds3.forEach(function(updatedCell) {
+            removeNakeds3.forEach(function(updatedCell: CellObj) {
                 gridClone[updatedCell.row][updatedCell.column] = updatedCell.value;
             });
         }
         if (removeNakeds4 !== undefined) {
             results.push(...removeNakeds4);
-            removeNakeds4.forEach(function(updatedCell) {
+            removeNakeds4.forEach(function(updatedCell: CellObj) {
                 gridClone[updatedCell.row][updatedCell.column] = updatedCell.value;
             });
         }
@@ -458,13 +486,13 @@ function removeNakeds(grid) {
 
         if (removeNakeds3 !== undefined) {
             results.push(...removeNakeds3);
-            removeNakeds3.forEach(function(updatedCell) {
+            removeNakeds3.forEach(function(updatedCell: CellObj) {
                 gridClone[updatedCell.row][updatedCell.column] = updatedCell.value;
             });
         }
         if (removeNakeds4 !== undefined) {
             results.push(...removeNakeds4);
-            removeNakeds4.forEach(function(updatedCell) {
+            removeNakeds4.forEach(function(updatedCell: CellObj) {
                 gridClone[updatedCell.row][updatedCell.column] = updatedCell.value;
             });
         }
@@ -484,7 +512,7 @@ function removeNakeds(grid) {
             }
             if (removeNakeds4 !== undefined) {
                 results.push(...removeNakeds4);
-                removeNakeds4.forEach(function(updatedCell) {
+                removeNakeds4.forEach(function(updatedCell: CellObj) {
                     gridClone[updatedCell.row][updatedCell.column] = updatedCell.value;
                 });
             }
@@ -500,21 +528,21 @@ x-wing
 Candidate appears twice in two different rows (or columns), and those appearances are both in the same column (or row). The candidate appears in four cells that form a square or rectangle. The candidate can only appear in two of the four cells. The two positions have to be diagonal opposites forming an X (hence the name). Safe to eliminate the candidate from other appearances in the cross axis. For example, if the candidate appears twice in two different rows, remove the candidate from the cells of the shared columns.
 */
 
-function findXWings(grid) {
+function findXWings(grid: GridArr) {
 
-    let xWings = [];
+    let xWings: XWingObj[] = [];
 
-    function examineUnit(unitValues, unitIndex, mainAxis) {
+    function examineUnit(unitValues: UnitArr, unitIndex: number, mainAxis: 'row' | 'column') {
 
-        let candidatesExamined = [];
-        let unitResults = [];
+        let candidatesExamined: number[] = [];
+        let unitResults: XWingObj[] = [];
 
-        unitValues.forEach(function(cellValue, cellIndex) {
+        unitValues.forEach(function(cellValue: number | number[], cellIndex: number) {
             if (Array.isArray(cellValue)) {
                 cellValue.forEach(function(candidateValue) {
 
                     let count = 0;
-                    let candidatePositions = [];
+                    let candidatePositions: CellCoords[] = [];
 
                     unitValues.forEach(function(cellValueForComparison, cellIndexForComparison) {
                         if (Array.isArray(cellValueForComparison)) {
@@ -553,30 +581,24 @@ function findXWings(grid) {
         unitResults.forEach(function(candidateCellPair) {
             // look for same candidate value in the same cross axis units (rows or columns)
 
-            function findOtherCandidatePair(unit, unitIndex) {
+            function findOtherCandidatePair(unit: UnitArr, unitIndex: number) {
 
-                let candidatePairUnitIndex;
-                let cellACrossAxisIndex;
-                let cellBCrossAxisIndex;
-                let cellAValue;
-                let cellBValue;
+                // mainAxis === 'row'
+                let candidatePairUnitIndex = candidateCellPair.positions[0][0];
+                let cellACrossAxisIndex = candidateCellPair.positions[0][1];
+                let cellBCrossAxisIndex = candidateCellPair.positions[1][1];
 
-                if (mainAxis === 'row') {
-                    candidatePairUnitIndex = candidateCellPair.positions[0][0];
-                    cellACrossAxisIndex = candidateCellPair.positions[0][1];
-                    cellBCrossAxisIndex = candidateCellPair.positions[1][1];
-                }
                 if (mainAxis === 'column') {
                     candidatePairUnitIndex = candidateCellPair.positions[0][1];
                     cellACrossAxisIndex = candidateCellPair.positions[0][0];
                     cellBCrossAxisIndex = candidateCellPair.positions[1][0];
                 }
 
-                cellAValue = unit[cellACrossAxisIndex];
-                cellBValue = unit[cellBCrossAxisIndex];
+                let cellAValue = unit[cellACrossAxisIndex];
+                let cellBValue = unit[cellBCrossAxisIndex];
 
                 let count = 0;
-                let newCandidatePositions = [];
+                let newCandidatePositions: CellCoords[] = [];
 
                 if (unitIndex > candidatePairUnitIndex) {
                     if (Array.isArray(cellAValue) && Array.isArray(cellBValue)) {
@@ -637,8 +659,8 @@ function findXWings(grid) {
 
     }
 
-    function getColumnValues(grid, column) {
-        let columnValues = [];
+    function getColumnValues(grid: GridArr, column: number) {
+        let columnValues: UnitArr = [];
         grid.forEach(function(row) {
             columnValues.push(row[column]);
         });
@@ -659,31 +681,31 @@ function findXWings(grid) {
 
 }
 
-function reduceCandidatesXWing(grid) {
+function reduceCandidatesXWing(grid: GridArr) {
 
     const gridClone = _.cloneDeep(grid);
     const xWings = findXWings(gridClone);
-    const results = [];
+    const results: CellObj[] = [];
 
-    xWings.forEach(function(xWing) {
+    xWings.forEach(function(xWing: XWingObj) {
 
         let xWingRows = xWing.positions.map(function(position) {
             return position[0];
         });
-        xWingRows = xWingRows.filter(function(rowPosition, index) {
+        xWingRows = xWingRows.filter(function(rowPosition, index: number) {
             return xWingRows.indexOf(rowPosition) === index;
         });
 
         let xWingColumns = xWing.positions.map(function(position) {
             return position[1];
         });
-        xWingColumns = xWingColumns.filter(function(columnPosition, index) {
+        xWingColumns = xWingColumns.filter(function(columnPosition, index: number) {
             return xWingColumns.indexOf(columnPosition) === index;
         });
 
         if (xWing.axis === 'column') {
 
-            xWingRows.forEach(function(xWingRow) {
+            xWingRows.forEach(function(xWingRow: number) {
                 const rowValues = getRowValues(gridClone, xWingRow);
                 rowValues.forEach(function(cellValue, index) {
                     if (!xWingColumns.includes(index)) {
@@ -702,7 +724,7 @@ function reduceCandidatesXWing(grid) {
 
         if (xWing.axis === 'row') {
 
-            xWingColumns.forEach(function(xWingColumn) {
+            xWingColumns.forEach(function(xWingColumn: number) {
                 const columnValues = getColumnValues(gridClone, xWingColumn);
                 columnValues.forEach(function(cellValue, index) {
                     if (!xWingRows.includes(index)) {
@@ -725,7 +747,7 @@ function reduceCandidatesXWing(grid) {
 
 }
 
-function removeCandidateFromCell(grid, row, column, value) {
+function removeCandidateFromCell(grid: GridArr, row: number, column: number, value: number) {
     const cellValue = getCellValue(grid, row, column);
 
     if (Array.isArray(cellValue) && cellValue.includes(value)) {
@@ -741,7 +763,7 @@ function removeCandidateFromCell(grid, row, column, value) {
     }
 }
 
-function initReduceCandidates(grid) {
+function initReduceCandidates(grid: GridArr) {
     const results = [];
     const gridClone = _.cloneDeep(grid);
 
@@ -766,7 +788,7 @@ function initReduceCandidates(grid) {
     return updateGrid(grid, results);
 }
 
-function reduceCandidates(grid, row, column, direction) {
+function reduceCandidates(grid: GridArr, row: number, column: number, direction: 'row' | 'column') {
 
     // row and column = the nonet's top left cell, for example 0,0 and 0,3 and 3,6, etc.
     // if direction = row, main axis = row, cross axis = column
@@ -777,7 +799,7 @@ function reduceCandidates(grid, row, column, direction) {
     // For example: [9, 6, [1,4,5], 7, 3, [1,4,5], [1,5], 2, 8] <- nonetValues; 4s in the same column
 
     const nonetValues = getNonetValues(grid, row, column);
-    const results = [];
+    const results: CellObj[] = [];
 
     const nonetMainAxisSet1 = nonetValues.filter(function(value, index) {
         if (direction === 'row') {
@@ -786,7 +808,7 @@ function reduceCandidates(grid, row, column, direction) {
             // direction === 'column'
             return index === 0 || index === 3 || index === 6;
         }
-    }).filter(function(value) {
+    }).filter(function(value): value is number[] {
         return Array.isArray(value);
     });
 
@@ -797,7 +819,7 @@ function reduceCandidates(grid, row, column, direction) {
             // direction === 'column'
             return index === 1 || index === 4 || index === 7;
         }
-    }).filter(function(value) {
+    }).filter(function(value): value is number[] {
         return Array.isArray(value);
     });
 
@@ -808,12 +830,12 @@ function reduceCandidates(grid, row, column, direction) {
             // direction === 'column'
             return index === 2 || index === 5 || index === 8;
         }
-    }).filter(function(value) {
+    }).filter(function(value): value is number[] {
         return Array.isArray(value);
     });
 
     const nonetMainAxisSets = [nonetMainAxisSet1, nonetMainAxisSet2, nonetMainAxisSet3];
-    let allCandidatesInCrossAxisSets = [];
+    let allCandidatesInCrossAxisSets: number[][] = [];
 
     nonetMainAxisSets.forEach(function(nonetMainAxisSet) {
         if (nonetMainAxisSet.length === 0) {
@@ -829,13 +851,10 @@ function reduceCandidates(grid, row, column, direction) {
 
     allCandidatesInCrossAxisSets.forEach(function(allCandidatesInMainAxisSet, index) {
 
-        let otherMainAxisSet1;
-        let otherMainAxisSet2;
+        // index === 0
+        let otherMainAxisSet1 = index + 1;
+        let otherMainAxisSet2 = index + 2;
 
-        if (index === 0) {
-            otherMainAxisSet1 = index + 1;
-            otherMainAxisSet2 = index + 2;
-        }
         if (index === 1) {
             otherMainAxisSet1 = index - 1;
             otherMainAxisSet2 = index + 1;
@@ -852,9 +871,9 @@ function reduceCandidates(grid, row, column, direction) {
             return !otherNonetMainAxisSetsValues.includes(value);
         });
 
-        let gridMainAxisSetIndex;
-        let gridMainAxisSetValues;
-        let indexesToInclude;
+        let gridMainAxisSetIndex: number;
+        let gridMainAxisSetValues: UnitArr;
+        let indexesToInclude: [number, number, number, number, number, number];
 
         if (direction === 'row') {
             gridMainAxisSetIndex = row + index;
@@ -869,8 +888,8 @@ function reduceCandidates(grid, row, column, direction) {
             if (column === 6) {
                 indexesToInclude = [0, 1, 2, 3, 4, 5];
             }
-        }
-        if (direction === 'column') {
+        } else {
+            // direction === 'column'
             gridMainAxisSetIndex = column + index;
             gridMainAxisSetValues = getColumnValues(grid, gridMainAxisSetIndex);
 
@@ -922,12 +941,12 @@ function reduceCandidates(grid, row, column, direction) {
 
 }
 
-function solveCell(grid, row, column) {
+function solveCell(grid: GridArr, row: number, column: number) {
 
     if (!(isCellSolved(grid, row, column))) {
 
         const candidates = getCandidates(grid, row, column);
-        let newCandidates = [];
+        let newCandidates: number[] = [];
 
         // if a single candidate works, store that value
         if (Array.isArray(candidates) && candidates.length === 1) {    
@@ -938,13 +957,13 @@ function solveCell(grid, row, column) {
             };
         }
 
-        const rowArrayValues = getRowValues(grid, row).filter(function(value, index) {
+        const rowArrayValues: UnitArr = getRowValues(grid, row).filter(function(value, index) {
             return index !== column;
         }).filter(function(value) {
             return Array.isArray(value) && value.length !== 0;
         });
 
-        const columnArrayValues = getColumnValues(grid, column).filter(function(value, index) {
+        const columnArrayValues: UnitArr = getColumnValues(grid, column).filter(function(value, index) {
             return index !== row;
         }).filter(function(value) {
             return Array.isArray(value) && value.length !== 0;
@@ -956,7 +975,14 @@ function solveCell(grid, row, column) {
             candidates.forEach(function(candidate) {
                 
                 const candidateInSomeArray = rowArrayValues.some(function(arrayValue) {
-                    return arrayValue.includes(candidate);
+                    if (Array.isArray(arrayValue)) {
+                        return arrayValue.includes(candidate);
+                    }
+                    else if (arrayValue === candidate) {
+                        return true;
+                    } else {
+                        return false;
+                    }
                 });
 
                 if (candidateInSomeArray) {
@@ -974,7 +1000,14 @@ function solveCell(grid, row, column) {
             candidates.forEach(function(candidate) {
                 
                 const candidateInSomeArray = columnArrayValues.some(function(arrayValue) {
-                    return arrayValue.includes(candidate);
+                    if (Array.isArray(arrayValue)) {
+                        return arrayValue.includes(candidate);
+                    } else if (arrayValue === candidate) {
+                        return true;
+                    } else {
+                        return false;
+                    }
+                    
                 });
 
                 if (candidateInSomeArray) {
@@ -1007,8 +1040,8 @@ function solveCell(grid, row, column) {
 
 }
 
-function setCandidates(grid) {
-    const cellsWithCandidates = [];
+function setCandidates(grid: GridArr) {
+    const cellsWithCandidates: CellObj[] = [];
     grid.forEach(function(row, i) {
         row.forEach(function(column, j) {
             if (!(isCellSolved(grid, i, j))) {
@@ -1026,8 +1059,8 @@ function setCandidates(grid) {
     return updateGrid(grid, cellsWithCandidates);
 }
 
-function solveCells(grid) {
-    const solvedCells = [];
+function solveCells(grid: GridArr) {
+    const solvedCells: CellObj[] = [];
     grid.forEach(function(row, i) {
         row.forEach(function(column, j) {
             if (!(isCellSolved(grid, i, j))) {
@@ -1043,14 +1076,18 @@ function solveCells(grid) {
     return setCandidates(updatedGrid);
 }
 
-function verifyCompletedGrid(grid) {
-    const gridColumns = [];
-    const gridNonets = [];
+function verifyCompletedGrid(grid: GridArr) {
+    const gridColumns: UnitArr[] = [];
+    const gridNonets: UnitArr[] = [];
 
     // Check rows
     const allRowsIncludeAllValues = grid.every(function(row) {
         return row.every(function(value) {
-            return [1,2,3,4,5,6,7,8,9].includes(value);
+            if (typeof value === 'number') {
+                return [1,2,3,4,5,6,7,8,9].includes(value);
+            } else {
+                return false;
+            }
         });
     });
 
@@ -1061,7 +1098,11 @@ function verifyCompletedGrid(grid) {
 
     const allColumnsIncludeAllValues = gridColumns.every(function(column) {
         return column.every(function(value) {
-            return [1,2,3,4,5,6,7,8,9].includes(value);
+            if (typeof value === 'number') {
+                return [1,2,3,4,5,6,7,8,9].includes(value);
+            } else {
+                return false;
+            }
         });
     });
 
@@ -1074,7 +1115,11 @@ function verifyCompletedGrid(grid) {
 
     const allNonetsIncludeAllValues = gridNonets.every(function(nonet) {
         return nonet.every(function(value) {
-            return [1,2,3,4,5,6,7,8,9].includes(value);
+            if (typeof value === 'number') {
+                return [1,2,3,4,5,6,7,8,9].includes(value);
+            } else {
+                return false;
+            }
         });
     });
 

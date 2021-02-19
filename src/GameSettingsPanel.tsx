@@ -1,6 +1,15 @@
-import React from 'react';
+interface GameSettingsPanelProps {
+    showCandidates: boolean;
+    setShowCandidates: React.Dispatch<React.SetStateAction<boolean>>;
+    highlightGivens: boolean;
+    setHighlightGivens: React.Dispatch<React.SetStateAction<boolean>>;
+    highlightSolvableCells: boolean;
+    setHighlightSolvableCells: React.Dispatch<React.SetStateAction<boolean>>;
+    highlightIncorrectCells: boolean;
+    setHighlightIncorrectCells: React.Dispatch<React.SetStateAction<boolean>>;
+}
 
-function GameSettingsPanel(props) {
+function GameSettingsPanel(props: GameSettingsPanelProps) {
 
     const {
         showCandidates, setShowCandidates,

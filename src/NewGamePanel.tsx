@@ -1,11 +1,19 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import games from './games';
 
-function getRandomInt(max) {
+function getRandomInt(max: number) {
     return Math.floor(Math.random() * Math.floor(max));
 }
 
-function NewGamePanel(props) {
+type GridArr = (number | number[])[][];
+
+interface NewGamePanelProps {
+    createNewGame: (initialGrid: GridArr) => void;
+    createCustomGame: () => void;
+    toggleMenu: () => void;
+}
+
+function NewGamePanel(props: NewGamePanelProps) {
 
     const [difficultyLevel, setDifficultyLevel] = useState('Easy');
     const {createNewGame, createCustomGame, toggleMenu} = props;

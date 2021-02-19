@@ -1,15 +1,27 @@
-import React from 'react';
+interface CellProps {
+    row: number;
+    column: number;
+    value: number | number[];
+    isGiven: boolean;
+    canBeSolved: boolean;
+    isIncorrect: boolean;
+    handleClick: (coords: number[], e: React.MouseEvent<HTMLInputElement, MouseEvent>) => void;
+    handleKeyDown: (coords: number[], e: React.KeyboardEvent<HTMLInputElement>) => void;
+}
 
-function Cell(props) {
+function Cell(props: CellProps) {
 
-    const {row, column, value, isGiven, canBeSolved, isIncorrect, handleChange, handleClick, handleKeyDown} = props;
-    const inputAttrs = {};
+    interface InputAttrsObj {
+        value: number | [];
+        disabled: boolean;
+    }
+
+    const {row, column, value, isGiven, canBeSolved, isIncorrect, handleClick, handleKeyDown} = props;
+    const inputAttrs: InputAttrsObj = { value: [], disabled: false };
     const cellDivClassName = `cell cell-row-${row} cell-column-${column}${ isGiven === true ? ' given' : '' }${ canBeSolved === true ? ' can-be-solved' : '' }${ isIncorrect === true ? ' incorrect' : '' }`;
 
     // set 'value' attribute for cell input
-    if (Array.isArray(value)) {
-        inputAttrs.value = [];
-    } else {
+    if (typeof value === 'number') {
         inputAttrs.value = value;
     }
 
@@ -30,10 +42,10 @@ function Cell(props) {
         <div id={`r${row}c${column}`} className={cellDivClassName}>
             <input
                 type="text"
-                maxLength="1"
+                maxLength={1}
                 pattern="[1-9]"
                 inputMode="none"
-                onChange={(e) => handleChange([row, column], e)}
+                onChange={() => { /* do nothing */ }}
                 onClick={(e) => handleClick([row, column], e)}
                 onKeyDown={(e) => handleKeyDown([row, column], e)}
                 {...inputAttrs}
