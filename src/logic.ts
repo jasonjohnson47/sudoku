@@ -401,10 +401,6 @@ function findNakeds(quantity: number, unitValues: UnitArr) {
 
 }
 
-//findNakeds(3, rowValues), rowValues, { 'row': rowIndex }, 'row'
-//findNakeds(4, columnValues), columnValues, { 'column': columnIndex }, 'column'
-//findNakeds(3, nonetValues), nonetValues, { 'row': rowIndex,'column': columnIndex }, 'nonet'
-
 interface UnitIndexesObj {
     row?: number;
     column?: number;

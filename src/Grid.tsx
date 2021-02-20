@@ -9,7 +9,7 @@ type GridArr = (number | number[])[][];
 
 interface GridProps {
     currentGridValues: GridArr;
-    pastGridValues: GridArr;
+    currentGridNoIncorrect: GridArr;
     completedGrid: GridArr;
     updateGame: (updatedGrid: GridArr) => void; 
     givens: GridArr;
@@ -23,9 +23,9 @@ interface GridProps {
 
 function Grid(props: GridProps) {
 
-    const {currentGridValues, pastGridValues, completedGrid, updateGame, givens, nextPossibleAnswers, showCandidates, highlightGivens, highlightSolvableCells, highlightIncorrectCells, isInGameMode} = props;
+    const {currentGridValues, currentGridNoIncorrect, completedGrid, updateGame, givens, nextPossibleAnswers, showCandidates, highlightGivens, highlightSolvableCells, highlightIncorrectCells, isInGameMode} = props;
     const [cellClicked, setCellClicked] = useState<null | HTMLInputElement>(null);
-    const [activeCell, setActiveCell] = useState<null | number[]>(null);
+    const [activeCell, setActiveCell] = useState<null | [number, number]>(null);
 
     const [isNumberPadActive, setIsNumberPadActive] = useState(false);
     const showNumberPad = () => {
@@ -35,7 +35,8 @@ function Grid(props: GridProps) {
         setIsNumberPadActive(false);
     }
 
-    function handleCellClick(coords: number[], e: React.MouseEvent<HTMLInputElement, MouseEvent>) {
+    function handleCellClick(coords: [number, number], e: React.MouseEvent<HTMLInputElement, MouseEvent>) {
+
         if (cellClicked === e.target) {
             isNumberPadActive ? hideNumberPad() : showNumberPad();
         } else {
@@ -56,7 +57,7 @@ function Grid(props: GridProps) {
         if (row !== null && col !== null) {
 
             if (targetButton.className === 'clear-button') {
-                newGridValues[row][col] = pastGridValues[row][col];
+                newGridValues[row][col] = setCandidates(currentGridNoIncorrect)[row][col];
             } else if (targetButton.className === 'solve-button') {
                 newGridValues[row][col] = completedGrid[row][col];
             } else {
@@ -77,13 +78,13 @@ function Grid(props: GridProps) {
         
     }
 
-    function handleKeyDown(coords: number[], e: React.KeyboardEvent<HTMLInputElement>) {
+    function handleKeyDown(coords: [number, number], e: React.KeyboardEvent<HTMLInputElement>) {
         const newGridValues = _.cloneDeep(currentGridValues);
         const row = coords[0];
         const col = coords[1];
 
         if (e.key === 'Backspace' || e.key === 'Delete') {
-            newGridValues[row][col] = [];
+            newGridValues[row][col] = setCandidates(currentGridNoIncorrect)[row][col];
         } else if (RegExp('[1-9]').test(e.key)) {
             newGridValues[row][col] = Number(e.key);
         } else {

@@ -59,10 +59,28 @@ function App() {
 
     const prevHistory = _.cloneDeep(history);
     const addHistory = (newHistory: HistoryObj) => setHistory([...prevHistory, newHistory]);
+    const initialGrid = history[0].grid;
     const currentGridValues = history[stepNumber].grid;
-    const nextGridValues = getGridNextAnswers(currentGridValues);
-    const nextPossibleAnswers = getDiffOfCompletedCells(currentGridValues, nextGridValues);
-    let completedGrid = isInGameMode ? getGridAnswers(history[0].grid) : generateEmptyBoard();
+    const completedGrid = isInGameMode ? getGridAnswers(history[0].grid) : generateEmptyBoard();
+
+    const currentGridNoIncorrect = _.cloneDeep(currentGridValues).map((row, i) => row.map((cell, j) => {
+        // merge current grid and initial grid to remove any incorrect values
+        if (typeof currentGridValues[i][j] === 'number') {
+            if (currentGridValues[i][j] === completedGrid[i][j]) {
+                // correct number
+                return currentGridValues[i][j];
+            } else {
+                // incorrect number, reset to candidates in initial grid
+                return initialGrid[i][j];
+            }
+        } else {
+            // keep value of current candidates
+            return currentGridValues[i][j];
+        }
+    }));
+    
+    const nextGridValues = getGridNextAnswers(currentGridNoIncorrect);
+    const nextPossibleAnswers = getDiffOfCompletedCells(currentGridNoIncorrect, nextGridValues);
 
     const checkCompletedGridMemoizedCallback = useCallback(
         (grid) => {
@@ -167,11 +185,8 @@ function App() {
 
             <Grid
                 currentGridValues={currentGridValues}
-                pastGridValues={
-                    stepNumber > 0
-                        ? history[stepNumber - 1].grid
-                        : history[0].grid
-                }
+                currentGridNoIncorrect={currentGridNoIncorrect}
+                completedGrid={completedGrid}
                 updateGame={updateGame}
                 givens={history[0].grid}
                 highlightGivens={highlightGivens}
@@ -179,15 +194,14 @@ function App() {
                 highlightIncorrectCells={highlightIncorrectCells}
                 showCandidates={showCandidates}
                 nextPossibleAnswers={nextPossibleAnswers}
-                completedGrid={completedGrid}
                 isInGameMode={isInGameMode}
             />
             
-            <h2>Game History</h2>
             <History
                 history={history}
                 jumpToStepInHistory={jumpToStepInHistory}
                 currentStep={stepNumber}
+                heading="Game History"
             />
         </div>
     );

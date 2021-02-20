@@ -5,8 +5,8 @@ interface CellProps {
     isGiven: boolean;
     canBeSolved: boolean;
     isIncorrect: boolean;
-    handleClick: (coords: number[], e: React.MouseEvent<HTMLInputElement, MouseEvent>) => void;
-    handleKeyDown: (coords: number[], e: React.KeyboardEvent<HTMLInputElement>) => void;
+    handleClick: (coords: [number, number], e: React.MouseEvent<HTMLInputElement, MouseEvent>) => void;
+    handleKeyDown: (coords: [number, number], e: React.KeyboardEvent<HTMLInputElement>) => void;
 }
 
 function Cell(props: CellProps) {
@@ -27,6 +27,9 @@ function Cell(props: CellProps) {
 
     // set 'disabled' attribute for cell input, if a 'given' number
     if (isGiven === true) {
+        inputAttrs.disabled = true;
+    }
+    if (typeof value === 'number' && !isIncorrect) {
         inputAttrs.disabled = true;
     }
 
