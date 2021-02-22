@@ -29,6 +29,7 @@
     padding:.25rem 0;
     background-color:#f6f6f6;
     background-image: linear-gradient(to bottom, #fff 0%, #fff 49%, #f4f4f4 51%, #f4f4f4 100%);
+    color: #000;
     border:1px solid #fff;
     border-radius: 3px;
     box-shadow: 1px 1px 1px 0 rgba(0,0,0,0.15);
@@ -45,4 +46,26 @@
     grid-column-start: 1;
     grid-column-end: 4;
     width:auto;
+}
+
+/* --------------- Dark Mode --------------- */
+
+.dark-mode .number-pad {
+    background-color: #222;
+    border:1px solid #444;
+    box-shadow: 3px 3px 3px 0 rgba(0,0,0,0.5), -1px -1px 0 0 #000;
+}
+
+.dark-mode .number-pad button {
+    background-color:#3d3d3d;
+    background-image: linear-gradient(to bottom, #3a3a3a 0%, #3a3a3a 49%, #303030 51%, #303030 100%);
+    border:1px solid #666;
+    box-shadow: 1px 1px 1px 0 rgba(0,0,0,0.5);
+    color: #d6d6d6;
+}
+.dark-mode .number-pad button:hover {
+    background-color:#3a3a3a;
+    background-image: none;
+    border-color: #303030;
+    box-shadow: 0 0 0 1px #666;
 }

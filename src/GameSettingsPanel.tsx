@@ -7,6 +7,8 @@ interface GameSettingsPanelProps {
     setHighlightSolvableCells: React.Dispatch<React.SetStateAction<boolean>>;
     highlightIncorrectCells: boolean;
     setHighlightIncorrectCells: React.Dispatch<React.SetStateAction<boolean>>;
+    darkMode: boolean;
+    setDarkMode: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 function GameSettingsPanel(props: GameSettingsPanelProps) {
@@ -15,7 +17,8 @@ function GameSettingsPanel(props: GameSettingsPanelProps) {
         showCandidates, setShowCandidates,
         highlightGivens, setHighlightGivens,
         highlightSolvableCells, setHighlightSolvableCells,
-        highlightIncorrectCells, setHighlightIncorrectCells
+        highlightIncorrectCells, setHighlightIncorrectCells,
+        darkMode, setDarkMode
     } = props;
 
     return (
@@ -78,6 +81,21 @@ function GameSettingsPanel(props: GameSettingsPanelProps) {
                 />
                 <label htmlFor="highlight-incorrect-cells" className="form-check-label">
                     Highlight Incorrect Cells
+                </label>
+            </div>
+            <div className="form-group form-check">
+                <input
+                    type="checkbox"
+                    className="form-check-input"
+                    id="dark-mode"
+                    name="dark-mode"
+                    checked={darkMode}
+                    onChange={(e) => {
+                        setDarkMode(e.target.checked);
+                    }}
+                />
+                <label htmlFor="dark-mode" className="form-check-label">
+                    Dark Mode
                 </label>
             </div>
         </div>

@@ -1,10 +1,16 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import Dropdown from 'react-bootstrap/Dropdown';
 import Grid from './Grid';
 import NewGamePanel from './NewGamePanel';
 import GameSettingsPanel from './GameSettingsPanel';
 import History from './History';
-import { setCandidates, verifyCompletedGrid, getGridAnswers, getGridNextAnswers, getDiffOfCompletedCells } from './logic';
+import {
+    setCandidates,
+    verifyCompletedGrid,
+    getGridAnswers,
+    getGridNextAnswers,
+    getDiffOfCompletedCells,
+} from './logic';
 import _ from 'lodash';
 
 type GridArr = (number | number[])[][];
@@ -14,14 +20,36 @@ interface HistoryObj {
 }
 
 function App() {
-
     function generateEmptyBoard() {
-        return [[[],[],[],[],[],[],[],[],[]],[[],[],[],[],[],[],[],[],[]],[[],[],[],[],[],[],[],[],[]],[[],[],[],[],[],[],[],[],[]],[[],[],[],[],[],[],[],[],[]],[[],[],[],[],[],[],[],[],[]],[[],[],[],[],[],[],[],[],[]],[[],[],[],[],[],[],[],[],[]],[[],[],[],[],[],[],[],[],[]]];
+        const emptyBoard: GridArr = [];
+        for (let i = 0; i < 9; i++) {
+            emptyBoard.push(Array(9).fill([]));
+        }
+        return emptyBoard;
+    }
+
+    function isGridFull(currentGridValues: GridArr) {
+        const currentGridValuesFlat = currentGridValues.flat();
+        return currentGridValuesFlat.every((value) => Number.isInteger(value));
+    }
+
+    function checkCompletedGrid(grid: GridArr) {
+        if (isGridFull(grid) === true) {
+            if (_.isEqual(grid, completedGrid)) {
+                if (verifyCompletedGrid(grid) === true) {
+                    alert('Congrats! Sudoku game completed successfully!');
+                }
+            } else {
+                alert("Sorry, some numbers aren't where they should be.");
+            }
+        }
     }
 
     const historyJson = localStorage.getItem('sudokuHistory');
     const [history, setHistory] = useState<HistoryObj[]>(
-        historyJson !== null ? JSON.parse(historyJson) : [{ grid: generateEmptyBoard() }]
+        historyJson !== null
+            ? JSON.parse(historyJson)
+            : [{ grid: generateEmptyBoard() }]
     );
 
     const stepNumberJson = localStorage.getItem('sudokuStepNumber');
@@ -39,15 +67,39 @@ function App() {
         highlightGivensJson !== null ? JSON.parse(highlightGivensJson) : true
     );
 
-    const highlightSolvableCellsJson = localStorage.getItem('sudokuHighlightSolvableCells');
+    const highlightSolvableCellsJson = localStorage.getItem(
+        'sudokuHighlightSolvableCells'
+    );
     const [highlightSolvableCells, setHighlightSolvableCells] = useState<boolean>(
-        highlightSolvableCellsJson !== null ? JSON.parse(highlightSolvableCellsJson) : true
+        highlightSolvableCellsJson !== null
+            ? JSON.parse(highlightSolvableCellsJson)
+            : true
     );
 
-    const highlightIncorrectCellsJson = localStorage.getItem('sudokuHighlightIncorrectCells');
-    const [highlightIncorrectCells, setHighlightIncorrectCells] = useState<boolean>(
-        highlightIncorrectCellsJson !== null ? JSON.parse(highlightIncorrectCellsJson) : true
+    const highlightIncorrectCellsJson = localStorage.getItem(
+        'sudokuHighlightIncorrectCells'
     );
+    const [
+        highlightIncorrectCells,
+        setHighlightIncorrectCells,
+    ] = useState<boolean>(
+        highlightIncorrectCellsJson !== null
+            ? JSON.parse(highlightIncorrectCellsJson)
+            : true
+    );
+
+    const darkModeJson = localStorage.getItem('sudokuDarkMode');
+    const [darkMode, setDarkMode] = useState<boolean>(
+        darkModeJson !== null
+            ? JSON.parse(darkModeJson)
+            : window.matchMedia('(prefers-color-scheme: dark)').matches
+    );
+
+    if (darkMode) {
+        document.body.classList.add('dark-mode');
+    } else {
+        document.body.classList.remove('dark-mode');
+    }
 
     const [isInGameMode, setIsInGameMode] = useState(true);
 
@@ -58,65 +110,86 @@ function App() {
     }
 
     const prevHistory = _.cloneDeep(history);
-    const addHistory = (newHistory: HistoryObj) => setHistory([...prevHistory, newHistory]);
+    const addHistory = (newHistory: HistoryObj) =>
+        setHistory([...prevHistory, newHistory]);
     const initialGrid = history[0].grid;
     const currentGridValues = history[stepNumber].grid;
-    const completedGrid = isInGameMode ? getGridAnswers(history[0].grid) : generateEmptyBoard();
+    const completedGrid = isInGameMode
+        ? getGridAnswers(history[0].grid)
+        : generateEmptyBoard();
 
-    const currentGridNoIncorrect = _.cloneDeep(currentGridValues).map((row, i) => row.map((cell, j) => {
-        // merge current grid and initial grid to remove any incorrect values
-        if (typeof currentGridValues[i][j] === 'number') {
-            if (currentGridValues[i][j] === completedGrid[i][j]) {
-                // correct number
-                return currentGridValues[i][j];
-            } else {
-                // incorrect number, reset to candidates in initial grid
-                return initialGrid[i][j];
-            }
-        } else {
-            // keep value of current candidates
-            return currentGridValues[i][j];
-        }
-    }));
-    
-    const nextGridValues = getGridNextAnswers(currentGridNoIncorrect);
-    const nextPossibleAnswers = getDiffOfCompletedCells(currentGridNoIncorrect, nextGridValues);
-
-    const checkCompletedGridMemoizedCallback = useCallback(
-        (grid) => {
-            if (isGridFull(grid) === true) {
-                if (_.isEqual(grid, completedGrid)) {
-                    if (verifyCompletedGrid(grid) === true) {
-                        alert('Congrats! Sudoku game completed successfully!');
+    const currentGridNoIncorrect = _.cloneDeep(currentGridValues).map(
+        (row, i) =>
+            row.map((cell, j) => {
+                // merge current grid and initial grid to remove any incorrect values
+                if (typeof currentGridValues[i][j] === 'number') {
+                    if (currentGridValues[i][j] === completedGrid[i][j]) {
+                        // correct number
+                        return currentGridValues[i][j];
+                    } else {
+                        // incorrect number, reset to candidates in initial grid
+                        return initialGrid[i][j];
                     }
                 } else {
-                    alert('Sorry, some numbers aren\'t where they should be.');
+                    // keep value of current candidates
+                    return currentGridValues[i][j];
                 }
-            }
-        }, [completedGrid]
+            })
+    );
+
+    const nextGridValues = getGridNextAnswers(currentGridNoIncorrect);
+    const nextPossibleAnswers = getDiffOfCompletedCells(
+        currentGridNoIncorrect,
+        nextGridValues
     );
 
     useEffect(() => {
         localStorage.setItem('sudokuHistory', JSON.stringify(history));
         localStorage.setItem('sudokuStepNumber', JSON.stringify(stepNumber));
-        localStorage.setItem('sudokuShowCandidates', JSON.stringify(showCandidates));
-        localStorage.setItem('sudokuHighlightGivens', JSON.stringify(highlightGivens));
-        localStorage.setItem('sudokuHighlightSolvableCells', JSON.stringify(highlightSolvableCells));
-        localStorage.setItem('sudokuHighlightIncorrectCells', JSON.stringify(highlightIncorrectCells));
-        checkCompletedGridMemoizedCallback(currentGridValues);
-    }, [history, stepNumber, showCandidates, highlightGivens, highlightSolvableCells, highlightIncorrectCells, checkCompletedGridMemoizedCallback, currentGridValues]);
-    
+        localStorage.setItem(
+            'sudokuShowCandidates',
+            JSON.stringify(showCandidates)
+        );
+        localStorage.setItem(
+            'sudokuHighlightGivens',
+            JSON.stringify(highlightGivens)
+        );
+        localStorage.setItem(
+            'sudokuHighlightSolvableCells',
+            JSON.stringify(highlightSolvableCells)
+        );
+        localStorage.setItem(
+            'sudokuHighlightIncorrectCells',
+            JSON.stringify(highlightIncorrectCells)
+        );
+        localStorage.setItem(
+            'sudokuDarkMode',
+            JSON.stringify(darkMode)
+        );
+    }, [
+        history,
+        stepNumber,
+        showCandidates,
+        highlightGivens,
+        highlightSolvableCells,
+        highlightIncorrectCells,
+        darkMode
+    ]);
+
     function updateGame(updatedGrid: GridArr) {
         if (isInGameMode) {
             addHistory({
-                grid: updatedGrid
+                grid: updatedGrid,
             });
             setStepNumber(history.length);
         } else {
-            setHistory([{
-                grid: updatedGrid
-            }]);
+            setHistory([
+                {
+                    grid: updatedGrid,
+                },
+            ]);
         }
+        checkCompletedGrid(updatedGrid);
     }
 
     function jumpToStepInHistory(step: number) {
@@ -135,15 +208,20 @@ function App() {
         setIsInGameMode(true);
     }
 
-    function isGridFull(currentGridValues: GridArr) {
-        const currentGridValuesFlat = currentGridValues.flat();
-        return currentGridValuesFlat.every((value) => Number.isInteger(value));
-    }
-
     return (
         <div className="App">
-            <Dropdown id="dropdown-game-menu" className="text-right" show={menuIsOpen}>
-                <Dropdown.Toggle variant="primary" id="game-menu" onClick={() => { toggleMenu() }}>
+            <Dropdown
+                id="dropdown-game-menu"
+                className="text-right"
+                show={menuIsOpen}
+            >
+                <Dropdown.Toggle
+                    variant="primary"
+                    id="game-menu"
+                    onClick={() => {
+                        toggleMenu();
+                    }}
+                >
                     <span className="sr-only">Menu</span>
                     <span className="navbar-toggler-icon"></span>
                 </Dropdown.Toggle>
@@ -165,20 +243,40 @@ function App() {
                         setHighlightSolvableCells={setHighlightSolvableCells}
                         highlightIncorrectCells={highlightIncorrectCells}
                         setHighlightIncorrectCells={setHighlightIncorrectCells}
+                        darkMode={darkMode}
+                        setDarkMode={setDarkMode}
                     />
                     <Dropdown.Divider />
-                    <button className="btn btn-block btn-primary" onClick={() => {
-                        toggleMenu();
-                        updateGame(completedGrid);
-                    }}>
+                    <button
+                        className="btn btn-block btn-primary"
+                        onClick={() => {
+                            toggleMenu();
+                            updateGame(completedGrid);
+                        }}
+                    >
                         Solve Puzzle
                     </button>
                 </Dropdown.Menu>
             </Dropdown>
 
-            <div className={isInGameMode === true ? "custom-game-instructions d-none" : "custom-game-instructions"}>
-                <p>Enter your starting numbers ("givens") in the cells to create your own game. When you have finished entering all the givens, click "Start Game" to start solving the puzzle.</p>
-                <button className="btn btn-primary" onClick={() => { createNewGame(currentGridValues) }}>
+            <div
+                className={
+                    isInGameMode === true
+                        ? 'custom-game-instructions d-none'
+                        : 'custom-game-instructions'
+                }
+            >
+                <p>
+                    Enter your starting numbers ("givens") in the cells to
+                    create your own game. When you have finished entering all
+                    the givens, click "Start Game" to start solving the puzzle.
+                </p>
+                <button
+                    className="btn btn-primary"
+                    onClick={() => {
+                        createNewGame(currentGridValues);
+                    }}
+                >
                     Start Game
                 </button>
             </div>
@@ -196,7 +294,7 @@ function App() {
                 nextPossibleAnswers={nextPossibleAnswers}
                 isInGameMode={isInGameMode}
             />
-            
+
             <History
                 history={history}
                 jumpToStepInHistory={jumpToStepInHistory}

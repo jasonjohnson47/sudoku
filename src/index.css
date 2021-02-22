@@ -5,12 +5,10 @@ input {
     font-size: 16px;
     font-weight: 400;
 }
-
 h2 {
     font-size: 1.25rem;
     font-weight: 600;
 }
-
 .btn-primary {
     color: #333;
     background-color: #f6f6f6;
@@ -52,4 +50,11 @@ h2 {
 }
 #dropdown-game-menu .dropdown-toggle::after {
     display: none;
+}
+
+/* --------------- Dark mode --------------- */
+
+body.dark-mode {
+    background-color: #303030;
+    color: #d6d6d6;
 }
