@@ -760,7 +760,7 @@ function removeCandidateFromCell(grid: GridArr, row: number, column: number, val
 }
 
 function initReduceCandidates(grid: GridArr) {
-    const results = [];
+    const results: CellObj[] = [];
     const gridClone = _.cloneDeep(grid);
 
     for (let row = 0; row <= 6; row = row + 3) {

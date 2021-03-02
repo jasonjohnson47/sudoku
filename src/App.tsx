@@ -103,6 +103,12 @@ function App() {
 
     const [isInGameMode, setIsInGameMode] = useState(true);
 
+    const [showAnswers, setShowAnswers] = useState(false);
+
+    function toggleShowAnswers() {
+        setShowAnswers(!showAnswers);
+    }
+
     const [menuIsOpen, setMenuIsOpen] = useState(false);
 
     function toggleMenu() {
@@ -215,6 +221,7 @@ function App() {
                 className="text-right"
                 show={menuIsOpen}
             >
+                <h2>Menu</h2>
                 <Dropdown.Toggle
                     variant="primary"
                     id="game-menu"
@@ -250,11 +257,11 @@ function App() {
                     <button
                         className="btn btn-block btn-primary"
                         onClick={() => {
-                            toggleMenu();
-                            updateGame(completedGrid);
+                            /*toggleMenu();*/
+                            toggleShowAnswers();
                         }}
                     >
-                        Solve Puzzle
+                        { showAnswers === true ? 'Hide Answers' : 'Show Answers' }
                     </button>
                 </Dropdown.Menu>
             </Dropdown>
@@ -293,6 +300,7 @@ function App() {
                 showCandidates={showCandidates}
                 nextPossibleAnswers={nextPossibleAnswers}
                 isInGameMode={isInGameMode}
+                showAnswers={showAnswers}
             />
 
             <History

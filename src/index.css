@@ -48,8 +48,15 @@ h2 {
 .navbar-toggler-icon {
     background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='30' height='30' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%280, 0, 0, 0.5%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
 }
+#dropdown-game-menu {
+    margin: 15px 15px 0 0;
+}
 #dropdown-game-menu .dropdown-toggle::after {
     display: none;
+}
+#dropdown-game-menu h2 {
+    display: inline;
+    margin-right: .75rem;
 }
 
 /* --------------- Dark mode --------------- */
@@ -57,4 +64,38 @@ h2 {
 body.dark-mode {
     background-color: #303030;
     color: #d6d6d6;
+}
+
+.dark-mode .dropdown-menu {
+    background-color: #3b3b3b;
+    color: #d6d6d6;
+    box-shadow: 0 0 7px 0 rgba(0,0,0,0.25);
+}
+.dark-mode .btn-primary {
+    color: #d6d6d6;
+    background-color: #252525;
+    border-color: #555;
+}
+.dark-mode .btn-primary:hover {
+    color: #d6d6d6;
+    background-color: #3b3b3b;
+    border-color: #666;
+}
+.dark-mode .btn-primary:not(:disabled):not(.disabled):active,
+.dark-mode .btn-primary:not(:disabled):not(.disabled).active,
+.dark-mode .show>.btn-primary.dropdown-toggle {
+    color: #d6d6d6;
+    background-color: #252525;
+    border-color: #555;
+}
+.dark-mode .navbar-toggler-icon {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='30' height='30' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 0.5%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+}
+.dark-mode .form-control {
+    background-color: #252525;
+    color: #d6d6d6;
+    border-color: #777;
+}
+.dark-mode .dropdown-divider {
+    border-top-color: #777;
 }

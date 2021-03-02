@@ -19,11 +19,12 @@ interface GridProps {
     highlightSolvableCells: boolean;
     highlightIncorrectCells: boolean;
     isInGameMode: boolean;
+    showAnswers: boolean;
 }
 
 function Grid(props: GridProps) {
 
-    const {currentGridValues, currentGridNoIncorrect, completedGrid, updateGame, givens, nextPossibleAnswers, showCandidates, highlightGivens, highlightSolvableCells, highlightIncorrectCells, isInGameMode} = props;
+    const {currentGridValues, currentGridNoIncorrect, completedGrid, updateGame, givens, nextPossibleAnswers, showCandidates, highlightGivens, highlightSolvableCells, highlightIncorrectCells, isInGameMode, showAnswers} = props;
     const [cellClicked, setCellClicked] = useState<null | HTMLInputElement>(null);
     const [activeCell, setActiveCell] = useState<null | [number, number]>(null);
 
@@ -121,7 +122,7 @@ function Grid(props: GridProps) {
                 key={`r${i}c${j}`}
                 row={i}
                 column={j}
-                value={currentGridValues[i][j]}
+                value={ showAnswers === true ? completedGrid[i][j] : currentGridValues[i][j]}
                 handleClick={handleCellClick}
                 handleKeyDown={handleKeyDown}
                 isGiven={Number.isInteger(givens[i][j])}
