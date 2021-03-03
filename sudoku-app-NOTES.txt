@@ -8,7 +8,7 @@ Play the game
   - if number is incorrect, user is notified (if setting is enabled)
 - user can ask for a hint, telling cell numbers are highlighted
 - button to automatically solve one cell
-- button to solve entire puzzle
+- button to show/hide answers
 
 Keep history of game play, one step for each solved cell
 Cache the current board via web storage
@@ -21,13 +21,10 @@ Game Panel
 --- Create Custom Game (clear board of all numbers, button for Start Solving Puzzle)
 --- Get a Hint
 --- Solve One Cell (on numberpad)
---- Solve the Puzzle
+--- Show/Hide Answers
 - SETTINGS
 --- Notify of incorrect numbers (checkbox)
 --- Show candidates (checkbox)
 --- Highlight givens (checkbox)
 --- Highlight solvable cells (checkbox)
 --- Show me the ones (twos, threes, etc.). Highlights squares with those numbers.
-
-Other To-Do Items:
-- Replace candidates after clearing a cell, unless it is solvable, then leave it blank

@@ -12,3 +12,9 @@
     height:2rem;
     display:block;
 }
+.history-current-step .form-control {
+    width: 3.5rem;
+    text-align: center;
+    padding:.625rem 0;
+    height: calc(1.5em + 1.25rem + 2px);
+}

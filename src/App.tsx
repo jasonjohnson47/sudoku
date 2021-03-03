@@ -199,7 +199,9 @@ function App() {
     }
 
     function jumpToStepInHistory(step: number) {
-        setStepNumber(step);
+        if (step >= 0 && step <= (history.length - 1)) {
+            setStepNumber(step);
+        }
     }
 
     function createCustomGame() {
