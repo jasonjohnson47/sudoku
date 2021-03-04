@@ -132,7 +132,7 @@ function Grid(props: GridProps) {
         );
     }
 
-    const gridClassName = `grid${showCandidates === false ? ' hide-candidates' : ''}${highlightGivens === true ? ' highlight-givens' : ''}${highlightSolvableCells === true ? ' highlight-solvable-cells' : ''}${highlightIncorrectCells === true ? ' highlight-incorrect-cells' : ''}`;
+    const gridClassName = `grid${showCandidates === false ? ' hide-candidates' : ''}${highlightGivens === true ? ' highlight-givens' : ''}${(highlightSolvableCells === true && isInGameMode === true ) ? ' highlight-solvable-cells' : ''}${highlightIncorrectCells === true ? ' highlight-incorrect-cells' : ''}`;
 
     return (
         <div className="grid-wrapper">

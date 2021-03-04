@@ -5,6 +5,9 @@ input {
     font-size: 16px;
     font-weight: 400;
 }
+.app-wrapper {
+    padding:15px;
+}
 h2 {
     font-size: 1.25rem;
     font-weight: 600;
@@ -49,7 +52,7 @@ h2 {
     background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='30' height='30' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%280, 0, 0, 0.5%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
 }
 #dropdown-game-menu {
-    margin: 15px 15px 0 0;
+    margin-bottom:15px;
 }
 #dropdown-game-menu .dropdown-toggle::after {
     display: none;
@@ -57,6 +60,15 @@ h2 {
 #dropdown-game-menu h2 {
     display: inline;
     margin-right: .75rem;
+}
+
+.custom-game-instructions {
+    max-width: 40.5rem;
+    margin: 2rem auto;
+    padding:1rem 1.5rem;
+    background-color: #f9f9fb;
+    border:1px solid #ddd;
+    border-radius: 10px;
 }
 
 /* --------------- Dark mode --------------- */
@@ -98,4 +110,9 @@ body.dark-mode {
 }
 .dark-mode .dropdown-divider {
     border-top-color: #777;
+}
+
+.dark-mode .custom-game-instructions {
+    background-color: #2a2a2a;
+    border:1px solid #444;
 }

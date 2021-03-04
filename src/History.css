@@ -17,4 +17,5 @@
     text-align: center;
     padding:.625rem 0;
     height: calc(1.5em + 1.25rem + 2px);
+    display:inline-block;
 }

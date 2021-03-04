@@ -60,7 +60,7 @@ function History(props: HistoryProps) {
             <h2 className="text-center">{heading}</h2>
             <div className="history-nav d-flex justify-content-center">
                 <button {...previousButtonAttrs}><svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="caret-left" className="svg-inline--fa fa-caret-left fa-w-6" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 512"><path fill="currentColor" d="M192 127.338v257.324c0 17.818-21.543 26.741-34.142 14.142L29.196 270.142c-7.81-7.81-7.81-20.474 0-28.284l128.662-128.662c12.599-12.6 34.142-3.676 34.142 14.142z"></path></svg><span className="sr-only">Previous Step</span></button>
-                    <span className="form-inline history-current-step">
+                    <span className="history-current-step">
                         <label htmlFor="current-step" className="sr-only">Current Step</label>
                         <input className="form-control" id="current-step" name="current-step" type="text" value={currentStep} onChange={handleCurrentStepChange} onClick={handleCurrentStepClick} onKeyDown={handleCurrentStepKeyDown} />&nbsp;/&nbsp;{historyLength - 1}
                     </span>

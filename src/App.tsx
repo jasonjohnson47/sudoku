@@ -111,6 +111,10 @@ function App() {
 
     const [menuIsOpen, setMenuIsOpen] = useState(false);
 
+    function closeMenu() {
+        setMenuIsOpen(false);
+    }
+
     function toggleMenu() {
         setMenuIsOpen(!menuIsOpen);
     }
@@ -217,7 +221,7 @@ function App() {
     }
 
     return (
-        <div className="App">
+        <div className="app-wrapper" onClick={() => { closeMenu() }}>
             <Dropdown
                 id="dropdown-game-menu"
                 className="text-right"
@@ -227,14 +231,15 @@ function App() {
                 <Dropdown.Toggle
                     variant="primary"
                     id="game-menu"
-                    onClick={() => {
+                    onClick={(e: React.MouseEvent<HTMLInputElement, MouseEvent>) => {
+                        e.stopPropagation()
                         toggleMenu();
                     }}
                 >
                     <span className="sr-only">Menu</span>
                     <span className="navbar-toggler-icon"></span>
                 </Dropdown.Toggle>
-                <Dropdown.Menu className="p-4">
+                <Dropdown.Menu className="p-4" onClick={(e: React.MouseEvent<HTMLInputElement, MouseEvent>) => { e.stopPropagation() }}>
                     <h2>Start a New Game</h2>
                     <NewGamePanel
                         createNewGame={createNewGame}
@@ -259,7 +264,7 @@ function App() {
                     <button
                         className="btn btn-block btn-primary"
                         onClick={() => {
-                            /*toggleMenu();*/
+                            toggleMenu();
                             toggleShowAnswers();
                         }}
                     >
