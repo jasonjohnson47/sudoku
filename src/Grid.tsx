@@ -57,8 +57,10 @@ function Grid(props: GridProps) {
 
         if (row !== null && col !== null) {
 
-            if (targetButton.className === 'clear-button') {
+            if (isInGameMode && (targetButton.className === 'clear-button')) {
                 newGridValues[row][col] = setCandidates(currentGridNoIncorrect)[row][col];
+            } else if (!isInGameMode && (targetButton.className === 'clear-button')) {
+                newGridValues[row][col] = [];
             } else if (targetButton.className === 'solve-button') {
                 newGridValues[row][col] = completedGrid[row][col];
             } else {
@@ -84,8 +86,10 @@ function Grid(props: GridProps) {
         const row = coords[0];
         const col = coords[1];
 
-        if (e.key === 'Backspace' || e.key === 'Delete') {
+        if (isInGameMode && (e.key === 'Backspace' || e.key === 'Delete')) {
             newGridValues[row][col] = setCandidates(currentGridNoIncorrect)[row][col];
+        } else if (!isInGameMode && (e.key === 'Backspace' || e.key === 'Delete')) {
+            newGridValues[row][col] = [];
         } else if (RegExp('[1-9]').test(e.key)) {
             newGridValues[row][col] = Number(e.key);
         } else {
@@ -122,12 +126,13 @@ function Grid(props: GridProps) {
                 key={`r${i}c${j}`}
                 row={i}
                 column={j}
-                value={ showAnswers === true ? completedGrid[i][j] : currentGridValues[i][j]}
+                value={ showAnswers === true ? completedGrid[i][j] : currentGridValues[i][j] }
                 handleClick={handleCellClick}
                 handleKeyDown={handleKeyDown}
-                isGiven={Number.isInteger(givens[i][j])}
-                canBeSolved={Number.isInteger(nextPossibleAnswers[i][j])}
+                isGiven={ Number.isInteger(givens[i][j]) }
+                canBeSolved={ Number.isInteger(nextPossibleAnswers[i][j]) }
                 isIncorrect={ isInGameMode && (Number.isInteger(currentGridValues[i][j]) && currentGridValues[i][j] !== completedGrid[i][j]) }
+                isInGameMode={isInGameMode}
             />
         );
     }

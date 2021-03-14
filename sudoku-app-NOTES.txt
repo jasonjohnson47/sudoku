@@ -31,7 +31,6 @@ Game Panel
 --- Self-manage Candidates
 
 To Do: 
-- ability to clear entered givens while manually creating a game
 - fix 'can be solved' where some disappear that once could be solved
 - self-manage candidates option
 - Show me the ones (twos, threes, etc.)
