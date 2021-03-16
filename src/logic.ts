@@ -19,9 +19,12 @@ interface XWingObj {
 
 function getDiffOfCompletedCells(currentGrid: GridArr, nextGrid: GridArr) {
     const result = nextGrid.map(function(row, i) {
-        const rowValues = row.map(function(value, j) {
-            if (Number.isInteger(value) && currentGrid[i][j] !== value) {
-                return value;
+        const rowValues = row.map(function(nextValue, j) {
+            const currentValue = currentGrid[i][j];
+            if (Number.isInteger(nextValue) && currentValue !== nextValue) {
+                return nextValue;
+            } else if (Array.isArray(nextValue) && nextValue.length === 1 && currentValue !== nextValue) {
+                return nextValue;
             } else {
                 return [];
             }

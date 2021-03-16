@@ -119,6 +119,20 @@ function Grid(props: GridProps) {
     
         return grid;
     }
+
+    function canCellBeSolved(row: number, col: number) {
+
+        const nextPossibleAnswer = nextPossibleAnswers[row][col];
+
+        if (Array.isArray(nextPossibleAnswer) && nextPossibleAnswer.length === 1) {
+            return true;
+        } else if (Number.isInteger(nextPossibleAnswer)) {
+            return true;
+        } else {
+            return false;
+        }
+
+    }
     
     function renderCell(i: number, j: number) {
         return (
@@ -130,7 +144,7 @@ function Grid(props: GridProps) {
                 handleClick={handleCellClick}
                 handleKeyDown={handleKeyDown}
                 isGiven={ Number.isInteger(givens[i][j]) }
-                canBeSolved={ Number.isInteger(nextPossibleAnswers[i][j]) }
+                canBeSolved={ canCellBeSolved(i, j) }
                 isIncorrect={ isInGameMode && (Number.isInteger(currentGridValues[i][j]) && currentGridValues[i][j] !== completedGrid[i][j]) }
                 isInGameMode={isInGameMode}
             />
