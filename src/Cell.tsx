@@ -5,6 +5,7 @@ interface CellProps {
     isGiven: boolean;
     canBeSolved: boolean;
     isIncorrect: boolean;
+    hasCandidate: boolean;
     isInGameMode: boolean;
     handleClick: (coords: [number, number], e: React.MouseEvent<HTMLInputElement, MouseEvent>) => void;
     handleKeyDown: (coords: [number, number], e: React.KeyboardEvent<HTMLInputElement>) => void;
@@ -17,9 +18,9 @@ function Cell(props: CellProps) {
         disabled: boolean;
     }
 
-    const {row, column, value, isGiven, canBeSolved, isIncorrect, isInGameMode, handleClick, handleKeyDown} = props;
+    const {row, column, value, isGiven, canBeSolved, isIncorrect, hasCandidate, isInGameMode, handleClick, handleKeyDown} = props;
     const inputAttrs: InputAttrsObj = { value: [], disabled: false };
-    const cellDivClassName = `cell cell-row-${row} cell-column-${column}${ isGiven === true ? ' given' : '' }${ canBeSolved === true ? ' can-be-solved' : '' }${ isIncorrect === true ? ' incorrect' : '' }`;
+    const cellDivClassName = `cell cell-row-${row} cell-column-${column}${ isGiven ? ' given' : '' }${ canBeSolved ? ' can-be-solved' : '' }${ isIncorrect ? ' incorrect' : '' }${ hasCandidate ? ' has-candidate' : '' }`;
 
     // set 'value' attribute for cell input
     if (typeof value === 'number') {

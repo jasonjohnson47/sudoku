@@ -4,6 +4,7 @@ import Grid from './Grid';
 import NewGamePanel from './NewGamePanel';
 import GameSettingsPanel from './GameSettingsPanel';
 import History from './History';
+import HighlightCellOptions from './HighlightCellOptions';
 import {
     setCandidates,
     verifyCompletedGrid,
@@ -152,6 +153,8 @@ function App() {
         currentGridNoIncorrect,
         nextGridValues
     );
+
+    const [highlightCellValue, setHighlightCellValue] = useState('off');
 
     useEffect(() => {
         localStorage.setItem('sudokuHistory', JSON.stringify(history));
@@ -304,10 +307,16 @@ function App() {
                 highlightGivens={highlightGivens}
                 highlightSolvableCells={highlightSolvableCells}
                 highlightIncorrectCells={highlightIncorrectCells}
+                highlightCellValue={highlightCellValue}
                 showCandidates={showCandidates}
                 nextPossibleAnswers={nextPossibleAnswers}
                 isInGameMode={isInGameMode}
                 showAnswers={showAnswers}
+            />
+
+            <HighlightCellOptions
+                highlightCellValue={highlightCellValue}
+                setHighlightCellValue={setHighlightCellValue}
             />
 
             <History
@@ -316,8 +325,10 @@ function App() {
                 currentStep={stepNumber}
                 heading="Game History"
             />
+
         </div>
     );
+    
 }
 
 export default App;

@@ -18,13 +18,14 @@ interface GridProps {
     highlightGivens: boolean;
     highlightSolvableCells: boolean;
     highlightIncorrectCells: boolean;
+    highlightCellValue: string;
     isInGameMode: boolean;
     showAnswers: boolean;
 }
 
 function Grid(props: GridProps) {
 
-    const {currentGridValues, currentGridNoIncorrect, completedGrid, updateGame, givens, nextPossibleAnswers, showCandidates, highlightGivens, highlightSolvableCells, highlightIncorrectCells, isInGameMode, showAnswers} = props;
+    const {currentGridValues, currentGridNoIncorrect, completedGrid, updateGame, givens, nextPossibleAnswers, showCandidates, highlightGivens, highlightSolvableCells, highlightIncorrectCells, highlightCellValue, isInGameMode, showAnswers} = props;
     const [cellClicked, setCellClicked] = useState<null | HTMLInputElement>(null);
     const [activeCell, setActiveCell] = useState<null | [number, number]>(null);
 
@@ -146,6 +147,7 @@ function Grid(props: GridProps) {
                 isGiven={ Number.isInteger(givens[i][j]) }
                 canBeSolved={ canCellBeSolved(i, j) }
                 isIncorrect={ isInGameMode && (Number.isInteger(currentGridValues[i][j]) && currentGridValues[i][j] !== completedGrid[i][j]) }
+                hasCandidate={ Array.isArray(currentGridValues[i][j]) && (currentGridValues[i][j] as number[]).includes(parseInt(highlightCellValue, 10)) }
                 isInGameMode={isInGameMode}
             />
         );

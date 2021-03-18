@@ -31,9 +31,7 @@ Game Panel
 --- Self-manage Candidates
 
 To Do: 
-- fix 'can be solved' where some disappear that once could be solved
 - self-manage candidates option
-- Show me the ones (twos, threes, etc.)
 - start game from smartphone camera or image import
 - user can ask for a hint, telling cell numbers are highlighted
 - computer generated games
