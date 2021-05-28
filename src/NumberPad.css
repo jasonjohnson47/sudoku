@@ -21,11 +21,12 @@
     display: grid;
 }
 
-.number-pad button {
+.number-pad button,
+.number-pad label.btn {
     width: 3rem;
     height: 3rem;
     font-size: 1.25rem;
-    line-height: 1.5;
+    line-height: 1.9;
     padding:.25rem 0;
     background-color:#f6f6f6;
     background-image: linear-gradient(to bottom, #fff 0%, #fff 49%, #f4f4f4 51%, #f4f4f4 100%);
@@ -42,10 +43,18 @@
 }
 
 .number-pad button.clear-button,
-.number-pad button.solve-button {
+.number-pad button.solve-button,
+.number-pad div.form-group {
     grid-column-start: 1;
     grid-column-end: 4;
     width:auto;
+}
+.number-pad div.form-group {
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+.number-pad .form-group label {
+    font-size: 0.875rem;
 }
 
 /* --------------- Dark Mode --------------- */
@@ -56,16 +65,21 @@
     box-shadow: 3px 3px 3px 0 rgba(0,0,0,0.5), -1px -1px 0 0 #000;
 }
 
-.dark-mode .number-pad button {
+.dark-mode .number-pad button,
+.dark-mode .number-pad label.btn {
     background-color:#3d3d3d;
     background-image: linear-gradient(to bottom, #3a3a3a 0%, #3a3a3a 49%, #303030 51%, #303030 100%);
     border:1px solid #666;
     box-shadow: 1px 1px 1px 0 rgba(0,0,0,0.5);
     color: #d6d6d6;
 }
-.dark-mode .number-pad button:hover {
+.dark-mode .number-pad button:hover,
+.dark-mode .number-pad label.btn:hover {
     background-color:#3a3a3a;
     background-image: none;
     border-color: #303030;
     box-shadow: 0 0 0 1px #666;
+}
+.dark-mode .number-pad label.btn.active {
+    border-color: #ffffcc !important;
 }

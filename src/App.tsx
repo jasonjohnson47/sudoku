@@ -46,37 +46,59 @@ function App() {
         }
     }
 
+    /*  Force Update */
+    /*const [, forceUpdate] = useReducer(x => x + 1, 0);*/
+
+    /* History */
     const historyJson = localStorage.getItem('sudokuHistory');
     const [history, setHistory] = useState<HistoryObj[]>(
         historyJson !== null
             ? JSON.parse(historyJson)
             : [{ grid: generateEmptyBoard() }]
     );
+    useEffect(() => {
+        localStorage.setItem('sudokuHistory', JSON.stringify(history));
+    }, [history]);
 
+    /* Step Number */
     const stepNumberJson = localStorage.getItem('sudokuStepNumber');
     const [stepNumber, setStepNumber] = useState<number>(
         stepNumberJson !== null ? JSON.parse(stepNumberJson) : 0
     );
+    useEffect(() => {
+        localStorage.setItem('sudokuStepNumber', JSON.stringify(stepNumber));
+    }, [stepNumber]);
 
+    /* Setting - Show Candidates */
     const showCandidatesJson = localStorage.getItem('sudokuShowCandidates');
     const [showCandidates, setShowCandidates] = useState<boolean>(
         showCandidatesJson !== null ? JSON.parse(showCandidatesJson) : false
     );
+    useEffect(() => {
+        localStorage.setItem('sudokuShowCandidates', JSON.stringify(showCandidates));
+    }, [showCandidates]);
 
+    /* Setting - Highlight Givens */
     const highlightGivensJson = localStorage.getItem('sudokuHighlightGivens');
     const [highlightGivens, setHighlightGivens] = useState<boolean>(
         highlightGivensJson !== null ? JSON.parse(highlightGivensJson) : true
     );
+    useEffect(() => {
+        localStorage.setItem('sudokuHighlightGivens', JSON.stringify(highlightGivens));
+    }, [highlightGivens]);
 
-    const highlightSolvableCellsJson = localStorage.getItem(
-        'sudokuHighlightSolvableCells'
-    );
+    /* Setting - Highlight Solvable Cells */
+    const highlightSolvableCellsJson = localStorage.getItem('sudokuHighlightSolvableCells');
     const [highlightSolvableCells, setHighlightSolvableCells] = useState<boolean>(
         highlightSolvableCellsJson !== null
             ? JSON.parse(highlightSolvableCellsJson)
             : true
     );
+    useEffect(() => {
+        localStorage.setItem('sudokuHighlightSolvableCells', JSON.stringify(highlightSolvableCells));
+    }, [highlightSolvableCells]);
 
+    /* Setting - Highlight Incorrect Cells */
     const highlightIncorrectCellsJson = localStorage.getItem(
         'sudokuHighlightIncorrectCells'
     );
@@ -88,13 +110,20 @@ function App() {
             ? JSON.parse(highlightIncorrectCellsJson)
             : true
     );
+    useEffect(() => {
+        localStorage.setItem('sudokuHighlightIncorrectCells', JSON.stringify(highlightIncorrectCells));
+    }, [highlightIncorrectCells]);
 
+    /* Setting - Dark Mode */
     const darkModeJson = localStorage.getItem('sudokuDarkMode');
     const [darkMode, setDarkMode] = useState<boolean>(
         darkModeJson !== null
             ? JSON.parse(darkModeJson)
             : window.matchMedia('(prefers-color-scheme: dark)').matches
     );
+    useEffect(() => {
+        localStorage.setItem('sudokuDarkMode', JSON.stringify(darkMode));
+    }, [darkMode]);
 
     if (darkMode) {
         document.body.classList.add('dark-mode');
@@ -105,13 +134,11 @@ function App() {
     const [isInGameMode, setIsInGameMode] = useState(true);
 
     const [showAnswers, setShowAnswers] = useState(false);
-
     function toggleShowAnswers() {
         setShowAnswers(!showAnswers);
     }
 
     const [menuIsOpen, setMenuIsOpen] = useState(false);
-
     function closeMenu() {
         setMenuIsOpen(false);
     }
@@ -120,31 +147,49 @@ function App() {
         setMenuIsOpen(!menuIsOpen);
     }
 
+    /*const [completedGrid, setCompletedGrid] = useState(isInGameMode
+        ? getGridAnswers(history[0].grid)
+        : generateEmptyBoard());*/
+
+    let completedGrid = isInGameMode
+        ? getGridAnswers(history[0].grid)
+        : generateEmptyBoard();
+
     const prevHistory = _.cloneDeep(history);
     const addHistory = (newHistory: HistoryObj) =>
         setHistory([...prevHistory, newHistory]);
     const initialGrid = history[0].grid;
     const currentGridValues = history[stepNumber].grid;
-    const completedGrid = isInGameMode
-        ? getGridAnswers(history[0].grid)
-        : generateEmptyBoard();
 
     const currentGridNoIncorrect = _.cloneDeep(currentGridValues).map(
         (row, i) =>
             row.map((cell, j) => {
+
+                const currentGridCellValue = currentGridValues[i][j];
+                const completedGridCellValue = completedGrid[i][j];
+
                 // merge current grid and initial grid to remove any incorrect values
-                if (typeof currentGridValues[i][j] === 'number') {
-                    if (currentGridValues[i][j] === completedGrid[i][j]) {
+                if (typeof currentGridCellValue === 'number') {
+                    if (currentGridCellValue === completedGridCellValue) {
                         // correct number
-                        return currentGridValues[i][j];
+                        return currentGridCellValue;
                     } else {
                         // incorrect number, reset to candidates in initial grid
                         return initialGrid[i][j];
                     }
-                } else {
-                    // keep value of current candidates
-                    return currentGridValues[i][j];
                 }
+                if (Array.isArray(currentGridCellValue)) {
+                    if (typeof completedGridCellValue === 'number' && currentGridCellValue.includes(completedGridCellValue)) {
+                        // correct candidates
+                        return currentGridCellValue;
+                    } else {
+                        // incorrect candidates, reset to candidates in initial grid
+                        return initialGrid[i][j];
+                    }
+                }
+                // keep value of current candidates
+                return currentGridCellValue;
+                
             })
     );
 
@@ -155,39 +200,6 @@ function App() {
     );
 
     const [highlightCellValue, setHighlightCellValue] = useState('off');
-
-    useEffect(() => {
-        localStorage.setItem('sudokuHistory', JSON.stringify(history));
-        localStorage.setItem('sudokuStepNumber', JSON.stringify(stepNumber));
-        localStorage.setItem(
-            'sudokuShowCandidates',
-            JSON.stringify(showCandidates)
-        );
-        localStorage.setItem(
-            'sudokuHighlightGivens',
-            JSON.stringify(highlightGivens)
-        );
-        localStorage.setItem(
-            'sudokuHighlightSolvableCells',
-            JSON.stringify(highlightSolvableCells)
-        );
-        localStorage.setItem(
-            'sudokuHighlightIncorrectCells',
-            JSON.stringify(highlightIncorrectCells)
-        );
-        localStorage.setItem(
-            'sudokuDarkMode',
-            JSON.stringify(darkMode)
-        );
-    }, [
-        history,
-        stepNumber,
-        showCandidates,
-        highlightGivens,
-        highlightSolvableCells,
-        highlightIncorrectCells,
-        darkMode
-    ]);
 
     function updateGame(updatedGrid: GridArr) {
         if (isInGameMode) {
@@ -325,6 +337,8 @@ function App() {
                 currentStep={stepNumber}
                 heading="Game History"
             />
+
+            {/*<button onClick={() => { setCompletedGrid(getGridAnswers(currentGridValues)) }}>Get Grid Answers</button>*/}
 
         </div>
     );

@@ -1,4 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
+import ButtonGroup from 'react-bootstrap/ButtonGroup';
+import ToggleButton from 'react-bootstrap/ToggleButton';
 import './NumberPad.css';
 
 interface PositionStylesObj {
@@ -51,13 +53,16 @@ function getNumberPadPosition(activeCell: HTMLDivElement, numberPad: HTMLDivElem
 interface NumberPadProps {
     cellClicked: HTMLInputElement | null;
     handleNumberPadButtonClick: (e: React.MouseEvent<HTMLButtonElement>) => void;
+    handleCandidateButtonClick: (activeCellValue: number | number[] | null, e: React.ChangeEvent<HTMLInputElement>) => void;
     hideNumberPad: () => void;
     isNumberPadActive: boolean;
+    activeCellValue: number | number[] | null;
+    completedGridCellValue: number | number[] | null;
 }
 
 const NumberPad = (props: NumberPadProps) => {
 
-    const {cellClicked, handleNumberPadButtonClick, hideNumberPad, isNumberPadActive} = props;
+    const {cellClicked, handleNumberPadButtonClick, handleCandidateButtonClick, hideNumberPad, isNumberPadActive, activeCellValue, completedGridCellValue} = props;
 
     const [numberPadStyle, setNumberPadStyle] = useState<PositionStylesObj>({
         top: '-9999px',
@@ -65,6 +70,8 @@ const NumberPad = (props: NumberPadProps) => {
         left: '-9999px',
         right:'auto'
     });
+
+    const [manageCandidatesMode, setManageCandidatesMode] = useState(false);
 
     const activeCell: HTMLDivElement | null = cellClicked ? cellClicked.parentElement as HTMLDivElement : null;
     const numberPadRef = useRef<HTMLDivElement | null>(null);
@@ -122,8 +129,35 @@ const NumberPad = (props: NumberPadProps) => {
         return numberButtons;
     }
 
+    function createCandidateButtons() {
+        const toggleButtons = [];
+
+        function hasCandidate(i: number) {
+            if (activeCellValue !== null && typeof activeCellValue !== 'number') {
+                return activeCellValue.includes(i);
+            }
+        }
+    
+        for (let i = 1; i < 10; i++) {
+            toggleButtons.push(
+                <ButtonGroup toggle key={`candidate-button-${i}`}>
+                    <ToggleButton
+                        type="checkbox"
+                        value={i}
+                        checked={hasCandidate(i)}
+                        onChange={(e) => {handleCandidateButtonClick(activeCellValue, e)}}
+                    >
+                        {i}
+                    </ToggleButton>
+                </ButtonGroup>
+            );
+        }
+    
+        return toggleButtons;
+    }
+
     function clearButton() {
-        if (activeCell !== null) {
+        /*if (activeCell !== null) {
             const activeCellInput = activeCell.querySelector('input')!;
             if (activeCellInput.value !== '') {
                 return (
@@ -134,6 +168,25 @@ const NumberPad = (props: NumberPadProps) => {
                         onClick={handleNumberPadButtonClick}
                     >Clear</button>
                 );
+            }
+        }*/
+
+        const buttonElem = (<button
+            type="button"
+            value=""
+            className="clear-button"
+            onClick={handleNumberPadButtonClick}
+        >Clear</button>);
+
+        if (activeCellValue !== null) {
+            if (typeof activeCellValue === 'number' && activeCellValue !== completedGridCellValue) {
+                return buttonElem;
+            }
+            if (Array.isArray(activeCellValue)
+                && typeof completedGridCellValue === 'number'
+                && !activeCellValue.includes(completedGridCellValue)
+            ){
+                return buttonElem;
             }
         }
     }
@@ -157,9 +210,26 @@ const NumberPad = (props: NumberPadProps) => {
             style={numberPadStyle}
             ref={numberPadRef}
         >
-            {createNumberButtons()}
+            { manageCandidatesMode === false ? createNumberButtons() : createCandidateButtons() }
             {clearButton()}
             {solveButton()}
+
+            <div className="form-group form-check">
+                <input
+                    type="checkbox"
+                    className="form-check-input"
+                    id="manage-candidates-mode"
+                    name="manage-candidates-mode"
+                    checked={manageCandidatesMode}
+                    onChange={(e) => {
+                        setManageCandidatesMode(e.target.checked);
+                    }}
+                />
+                <label htmlFor="manage-candidates-mode" className="form-check-label">
+                    Edit Candidates
+                </label>
+            </div>
+
         </div>
     );
 

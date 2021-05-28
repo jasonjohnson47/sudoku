@@ -10,7 +10,7 @@ type GridArr = (number | number[])[][];
 interface GridProps {
     currentGridValues: GridArr;
     currentGridNoIncorrect: GridArr;
-    completedGrid: GridArr;
+    completedGrid: GridArr; /* In a perfect world, would be number[] */
     updateGame: (updatedGrid: GridArr) => void; 
     givens: GridArr;
     nextPossibleAnswers: GridArr;
@@ -51,10 +51,10 @@ function Grid(props: GridProps) {
 
     function handleNumberPadButtonClick(e: React.MouseEvent<HTMLButtonElement>) {
         const newGridValues = _.cloneDeep(currentGridValues);
-        const row = activeCell !== null ? activeCell[0]: null;
-        const col = activeCell !== null ? activeCell[1]: null;
+        const row = activeCell !== null ? activeCell[0] : null;
+        const col = activeCell !== null ? activeCell[1] : null;
         const targetButton = e.target as HTMLButtonElement;
-        let isCorrect: boolean = false;
+        let isCorrect = false;
 
         if (row !== null && col !== null) {
 
@@ -109,6 +109,42 @@ function Grid(props: GridProps) {
 
     }
 
+    function handleCandidateButtonClick(activeCellValue: number | number[] | null, e: React.ChangeEvent<HTMLInputElement>) {
+
+        let newGridValues = _.cloneDeep(currentGridValues);
+        const row = activeCell !== null ? activeCell[0] : null;
+        const col = activeCell !== null ? activeCell[1] : null;
+        const targetButton = e.target as HTMLInputElement;
+        const targetButtonValue = Number(targetButton.value);
+
+        if (row !== null && col !== null) {
+            const cellValue = newGridValues[row][col];
+            const completedGridCellValue = completedGrid[row][col];
+
+            if (Array.isArray(cellValue)) {
+                let newCellValue: number[] = [];
+                if (cellValue.includes(targetButtonValue)) {
+                    newCellValue = cellValue.filter((candidate: number) => candidate !== targetButtonValue);
+                } else {
+                    newCellValue = [...cellValue, targetButtonValue];
+                }
+                newGridValues[row][col] = newCellValue;
+                
+                if (typeof completedGridCellValue === 'number') {
+                    const isCorrect = !cellValue.includes(completedGridCellValue);
+                    if (isCorrect) {
+                        updateGame(setCandidates(newGridValues));
+                    } else {
+                        updateGame(newGridValues);
+                    }
+                }
+
+            }
+
+        }
+
+    }
+
     function createGrid() {
         let grid = [];
     
@@ -134,6 +170,28 @@ function Grid(props: GridProps) {
         }
 
     }
+
+    function checkIfCorrect(row: number, col: number) {
+
+        const cellValue = currentGridValues[row][col];
+        const completedGridCellValue = completedGrid[row][col];
+
+        if (isInGameMode) {
+            if (Number.isInteger(cellValue) && cellValue !== completedGrid[row][col]) {
+                return true;
+            } else if (Array.isArray(cellValue)
+                && typeof completedGridCellValue === 'number'
+                && !cellValue.includes(completedGridCellValue)
+            ){
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
+
+    }
     
     function renderCell(i: number, j: number) {
         return (
@@ -146,7 +204,7 @@ function Grid(props: GridProps) {
                 handleKeyDown={handleKeyDown}
                 isGiven={ Number.isInteger(givens[i][j]) }
                 canBeSolved={ canCellBeSolved(i, j) }
-                isIncorrect={ isInGameMode && (Number.isInteger(currentGridValues[i][j]) && currentGridValues[i][j] !== completedGrid[i][j]) }
+                isIncorrect={ checkIfCorrect(i, j) }
                 hasCandidate={ Array.isArray(currentGridValues[i][j]) && (currentGridValues[i][j] as number[]).includes(parseInt(highlightCellValue, 10)) }
                 isInGameMode={isInGameMode}
             />
@@ -163,8 +221,11 @@ function Grid(props: GridProps) {
             <NumberPad
                 cellClicked={cellClicked}
                 handleNumberPadButtonClick={handleNumberPadButtonClick}
+                handleCandidateButtonClick={handleCandidateButtonClick}
                 hideNumberPad={hideNumberPad}
                 isNumberPadActive={isNumberPadActive}
+                activeCellValue={ activeCell !== null ? currentGridValues[activeCell[0]][activeCell[1]] : null }
+                completedGridCellValue={ activeCell !== null ? completedGrid[activeCell[0]][activeCell[1]] : null }
             />
         </div>
     );
