@@ -102,47 +102,47 @@ function getNonetValues(grid: GridArr, row: number, column: number) {
 
     // sqr1
     if (row <= 2 && column <= 2) {
-        return generateNonet(grid, 0,0);
+        return generateNonet(grid, 0, 0);
     }
 
     // sqr2
     if (row <= 2 && (column >= 3 && column <= 5)) {
-        return generateNonet(grid, 0,3);
+        return generateNonet(grid, 0, 3);
     }
 
     // sqr3
     if (row <= 2 && column >= 6) {
-        return generateNonet(grid, 0,6);
+        return generateNonet(grid, 0, 6);
     }
 
     // sqr4
     if ((row >= 3 && row <= 5) && column <= 2) {
-        return generateNonet(grid, 3,0);
+        return generateNonet(grid, 3, 0);
     }
 
     // sqr5
     if ((row >= 3 && row <= 5) && (column >= 3 && column <= 5)) {
-        return generateNonet(grid, 3,3);
+        return generateNonet(grid, 3, 3);
     }
 
     // sqr6
     if ((row >= 3 && row <= 5) && column >= 6) {
-        return generateNonet(grid, 3,6);
+        return generateNonet(grid, 3, 6);
     }
 
     // sqr7
     if (row >= 6 && column <= 2) {
-        return generateNonet(grid, 6,0);
+        return generateNonet(grid, 6, 0);
     }
 
     // sqr8
     if (row >= 6 && (column >= 3 && column <= 5)) {
-        return generateNonet(grid, 6,3);
+        return generateNonet(grid, 6, 3);
     }
 
     // sqr9
     // row >= 6 && column >= 6
-    return generateNonet(grid, 6,6);
+    return generateNonet(grid, 6, 6);
 
 }
 
@@ -166,6 +166,26 @@ function getNonetRowsCols(rowOrCol: number) {
 
     return [rowOrCol1, rowOrCol2, rowOrCol3];
 }
+
+/*function getAllValuesInSameColRowNonet(grid: GridArr, row: number, column: number) {
+    const allValues = Array.from(new Set(getNonetValues(grid, row, column).concat(getRowValues(grid, row)).concat(getColumnValues(grid, column)))).filter(function(value) {
+        return typeof value === 'number' || (Array.isArray(value) && value.length !== 0);
+    });
+    return allValues;
+}*/
+function getAllValuesInSameColRowNonet(grid: GridArr, row: number, column: number) {
+    const rowValues = getRowValues(grid, row);
+    const columnValues = getColumnValues(grid, column);
+    const nonetValues = getNonetValues(grid, row, column);
+
+    const allValues = [...rowValues, ...columnValues, ...nonetValues];
+    const allNonEmptyValues = allValues.filter(function(value) {
+        return typeof value === 'number' || (Array.isArray(value) && value.length !== 0);
+    });
+
+    return allNonEmptyValues;
+}
+
 
 function isCellSolved (grid: GridArr, row: number, column: number) {
     if (typeof grid[row][column] === 'number') {
@@ -315,9 +335,7 @@ function solveNonets(grid: GridArr) {
 
 function getCandidates(grid: GridArr, row: number, column: number) {
 
-    const allValues = Array.from(new Set(getNonetValues(grid, row, column).concat(getRowValues(grid, row)).concat(getColumnValues(grid, column)))).filter(function(value) {
-        return typeof value === 'number' || (Array.isArray(value) && value.length !== 0);
-    });
+    const allValues = _.uniq(getAllValuesInSameColRowNonet(grid, row, column));
 
     let startingCandidates: number | number[];
 
@@ -1128,4 +1146,122 @@ function verifyCompletedGrid(grid: GridArr) {
 
 }
 
-export { setCandidates, solveCells, solveNonets, removeNakeds, reduceCandidatesXWing, initReduceCandidates, verifyCompletedGrid, getGridNextAnswers, getGridAnswers, getDiffOfCompletedCells };
+function isUnique(unit: UnitArr, index: number): boolean {
+    const unitOnlyNumbers = unit.filter((value) => typeof value === 'number');
+    return unitOnlyNumbers.length === _.uniq(unitOnlyNumbers).length;
+}
+
+function getNonetReferenceCell(nonetIndex: number) {
+    /* Top left nonet is 0, top middle is 1, ... bottom right is 8 */
+
+    let nonetTopLeftCell: number[] = [0, 0];
+
+    if (nonetIndex === 1) {
+        nonetTopLeftCell = [0, 3];
+    }
+    if (nonetIndex === 2) {
+        nonetTopLeftCell = [0, 6];
+    }
+    if (nonetIndex === 3) {
+        nonetTopLeftCell = [3, 0];
+    }
+    if (nonetIndex === 4) {
+        nonetTopLeftCell = [3, 3];
+    }
+    if (nonetIndex === 5) {
+        nonetTopLeftCell = [3, 6];
+    }
+    if (nonetIndex === 6) {
+        nonetTopLeftCell = [6, 0];
+    }
+    if (nonetIndex === 7) {
+        nonetTopLeftCell = [6, 3];
+    }
+    if (nonetIndex === 8) {
+        nonetTopLeftCell = [6, 6];
+    }
+
+    return nonetTopLeftCell;
+}
+
+function findDuplicatesInUnit(unit: UnitArr, unitIndex: number, unitType: UnitTypes) {
+    
+    const duplicates: CellObj[] = [];
+    
+    unit.forEach(function(elem, elemIndex, arr) {
+        const arrCopy = [...arr];
+        arrCopy.splice(elemIndex, 1);
+
+        if (typeof elem === 'number' && arrCopy.includes(elem)) {
+
+            if (unitType === 'row') {
+                duplicates.push({
+                    row: unitIndex,
+                    column: elemIndex,
+                    value: elem
+                });
+            }
+            if (unitType === 'column') {
+                duplicates.push({
+                    row: elemIndex,
+                    column: unitIndex,
+                    value: elem
+                });
+            }
+            if (unitType === 'nonet') {
+                const nonetReferenceCell = getNonetReferenceCell(unitIndex);
+                const gridCell = nonetValuesArrayIndexToGridCell(elemIndex, nonetReferenceCell[0], nonetReferenceCell[1]);
+                duplicates.push({
+                    row: gridCell[0],
+                    column: gridCell[1],
+                    value: elem
+                })
+            }
+
+            
+        }
+    }, []);
+
+    return duplicates;
+
+}
+
+function findDuplicatesInSharedUnits(grid: GridArr): CellObj[] {
+    const duplicates: CellObj[] = [];
+    const gridColumns: UnitArr[] = [];
+    const gridNonets: UnitArr[] = [];
+
+    grid.forEach(function (row, i) {
+        if (!isUnique(row, i)) {
+            duplicates.push(...(findDuplicatesInUnit(row, i, 'row')));
+        }
+    });
+
+    grid[0].forEach(function(column, i) {
+        gridColumns.push(getColumnValues(grid, i));
+    });
+
+    gridColumns.forEach(function(column, i) {
+        if (!isUnique(column, i)) {
+            duplicates.push(...(findDuplicatesInUnit(column, i, 'column')));
+        }
+    });
+
+    for (let row = 0; row <= 6; row = row + 3) {
+        for (let col = 0; col <= 6; col = col + 3) {
+            gridNonets.push(getNonetValues(grid, row, col));
+        }
+    }
+
+    gridNonets.forEach(function(nonet, i) {
+        if (!isUnique(nonet, i)) {
+            duplicates.push(...(findDuplicatesInUnit(nonet, i, 'nonet')));
+        }
+    });
+
+    //console.log(_.uniqWith(duplicates, _.isEqual));
+    return _.uniqWith(duplicates, _.isEqual);
+    
+}
+
+export { setCandidates, solveCells, solveNonets, removeNakeds, reduceCandidatesXWing, initReduceCandidates, verifyCompletedGrid, getGridNextAnswers, getGridAnswers, getDiffOfCompletedCells, findDuplicatesInSharedUnits };

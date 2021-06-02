@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import Cell from './Cell';
 import NumberPad from './NumberPad';
-import {setCandidates} from './logic';
+import {setCandidates, findDuplicatesInSharedUnits} from './logic';
 import _ from 'lodash';
 import './Grid.css';
 
@@ -171,25 +171,41 @@ function Grid(props: GridProps) {
 
     }
 
+    const duplicatesInSharedUnits = findDuplicatesInSharedUnits(currentGridValues);
+
+    function isValueInSharedUnits(row: number, col: number) {
+        return duplicatesInSharedUnits.some(function (cellObj) {
+            return cellObj.row === row && cellObj.column === col;
+        });
+    }
+
     function checkIfCorrect(row: number, col: number) {
 
         const cellValue = currentGridValues[row][col];
         const completedGridCellValue = completedGrid[row][col];
 
         if (isInGameMode) {
-            if (Number.isInteger(cellValue) && cellValue !== completedGrid[row][col]) {
-                return true;
+            if (Number.isInteger(cellValue) && cellValue !== completedGridCellValue) {
+                return false;
             } else if (Array.isArray(cellValue)
                 && typeof completedGridCellValue === 'number'
                 && !cellValue.includes(completedGridCellValue)
             ){
-                return true;
-            } else {
                 return false;
+            } else {
+                return true;
             }
-        } else {
-            return false;
         }
+
+        if (!isInGameMode) {
+            if (typeof cellValue === 'number' && isValueInSharedUnits(row, col)) {
+                return false;
+            } else {
+                return true;
+            }
+        }
+        
+        return true;
 
     }
     
@@ -204,7 +220,7 @@ function Grid(props: GridProps) {
                 handleKeyDown={handleKeyDown}
                 isGiven={ Number.isInteger(givens[i][j]) }
                 canBeSolved={ canCellBeSolved(i, j) }
-                isIncorrect={ checkIfCorrect(i, j) }
+                isIncorrect={ !checkIfCorrect(i, j) }
                 hasCandidate={ Array.isArray(currentGridValues[i][j]) && (currentGridValues[i][j] as number[]).includes(parseInt(highlightCellValue, 10)) }
                 isInGameMode={isInGameMode}
             />
@@ -223,6 +239,7 @@ function Grid(props: GridProps) {
                 handleNumberPadButtonClick={handleNumberPadButtonClick}
                 handleCandidateButtonClick={handleCandidateButtonClick}
                 hideNumberPad={hideNumberPad}
+                isInGameMode={isInGameMode}
                 isNumberPadActive={isNumberPadActive}
                 activeCellValue={ activeCell !== null ? currentGridValues[activeCell[0]][activeCell[1]] : null }
                 completedGridCellValue={ activeCell !== null ? completedGrid[activeCell[0]][activeCell[1]] : null }

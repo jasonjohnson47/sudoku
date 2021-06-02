@@ -55,6 +55,7 @@ interface NumberPadProps {
     handleNumberPadButtonClick: (e: React.MouseEvent<HTMLButtonElement>) => void;
     handleCandidateButtonClick: (activeCellValue: number | number[] | null, e: React.ChangeEvent<HTMLInputElement>) => void;
     hideNumberPad: () => void;
+    isInGameMode: boolean;
     isNumberPadActive: boolean;
     activeCellValue: number | number[] | null;
     completedGridCellValue: number | number[] | null;
@@ -62,7 +63,7 @@ interface NumberPadProps {
 
 const NumberPad = (props: NumberPadProps) => {
 
-    const {cellClicked, handleNumberPadButtonClick, handleCandidateButtonClick, hideNumberPad, isNumberPadActive, activeCellValue, completedGridCellValue} = props;
+    const {cellClicked, handleNumberPadButtonClick, handleCandidateButtonClick, hideNumberPad, isInGameMode, isNumberPadActive, activeCellValue, completedGridCellValue} = props;
 
     const [numberPadStyle, setNumberPadStyle] = useState<PositionStylesObj>({
         top: '-9999px',
@@ -156,21 +157,7 @@ const NumberPad = (props: NumberPadProps) => {
         return toggleButtons;
     }
 
-    function clearButton() {
-        /*if (activeCell !== null) {
-            const activeCellInput = activeCell.querySelector('input')!;
-            if (activeCellInput.value !== '') {
-                return (
-                    <button
-                        type="button"
-                        value=""
-                        className="clear-button"
-                        onClick={handleNumberPadButtonClick}
-                    >Clear</button>
-                );
-            }
-        }*/
-
+    function ClearButton() {
         const buttonElem = (<button
             type="button"
             value=""
@@ -181,17 +168,20 @@ const NumberPad = (props: NumberPadProps) => {
         if (activeCellValue !== null) {
             if (typeof activeCellValue === 'number' && activeCellValue !== completedGridCellValue) {
                 return buttonElem;
-            }
-            if (Array.isArray(activeCellValue)
+            } else if (Array.isArray(activeCellValue)
                 && typeof completedGridCellValue === 'number'
                 && !activeCellValue.includes(completedGridCellValue)
             ){
                 return buttonElem;
+            } else {
+                return null;
             }
+        } else {
+            return null;
         }
     }
 
-    function solveButton() {
+    function SolveButton() {
         if (activeCell !== null && activeCell.classList.contains('can-be-solved')) {
             return (
                 <button
@@ -201,6 +191,32 @@ const NumberPad = (props: NumberPadProps) => {
                     onClick={handleNumberPadButtonClick}
                 >Solve</button>
             );
+        } else {
+            return null;
+        }
+    }
+
+    function EditCandidatesCheckbox() {
+        if (isInGameMode === true) {
+            return (
+                <div className="form-group form-check">
+                    <input
+                        type="checkbox"
+                        className="form-check-input"
+                        id="manage-candidates-mode"
+                        name="manage-candidates-mode"
+                        checked={manageCandidatesMode}
+                        onChange={(e) => {
+                            setManageCandidatesMode(e.target.checked);
+                        }}
+                    />
+                    <label htmlFor="manage-candidates-mode" className="form-check-label">
+                        Edit Candidates
+                    </label>
+                </div>
+            );
+        } else {
+            return null;
         }
     }
         
@@ -211,25 +227,9 @@ const NumberPad = (props: NumberPadProps) => {
             ref={numberPadRef}
         >
             { manageCandidatesMode === false ? createNumberButtons() : createCandidateButtons() }
-            {clearButton()}
-            {solveButton()}
-
-            <div className="form-group form-check">
-                <input
-                    type="checkbox"
-                    className="form-check-input"
-                    id="manage-candidates-mode"
-                    name="manage-candidates-mode"
-                    checked={manageCandidatesMode}
-                    onChange={(e) => {
-                        setManageCandidatesMode(e.target.checked);
-                    }}
-                />
-                <label htmlFor="manage-candidates-mode" className="form-check-label">
-                    Edit Candidates
-                </label>
-            </div>
-
+            <ClearButton />
+            <SolveButton />
+            <EditCandidatesCheckbox />
         </div>
     );
 

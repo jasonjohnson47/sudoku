@@ -28,10 +28,16 @@ Game Panel
 --- Highlight givens (checkbox)
 --- Highlight solvable cells (checkbox)
 --- Show me the ones (twos, threes, etc.). Highlights squares with those numbers.
---- Self-manage Candidates
+--- Self-manage Candidates OR Automatically Manage Candidates
 
 To Do: 
-- self-manage candidates option
+- Change SolveButton in NumberPad so it doesn't rely on a class being present on the cell
+- Add label to indicate the difficulty level of the current game
 - start game from smartphone camera or image import
 - user can ask for a hint, telling cell numbers are highlighted
 - computer generated games
+- Ability to turn off the automatic reducing of candidates
+
+Do this?
+- If in 'edit candidates' mode, keyboard press can toggle candidates
+- Automatically reduce candidates as user manually edits candidates
