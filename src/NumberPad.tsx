@@ -59,11 +59,13 @@ interface NumberPadProps {
     isNumberPadActive: boolean;
     activeCellValue: number | number[] | null;
     completedGridCellValue: number | number[] | null;
+    activeCellCoords: null | [number, number];
+    canCellBeSolved: (row: number, col: number) => boolean;
 }
 
 const NumberPad = (props: NumberPadProps) => {
 
-    const {cellClicked, handleNumberPadButtonClick, handleCandidateButtonClick, hideNumberPad, isInGameMode, isNumberPadActive, activeCellValue, completedGridCellValue} = props;
+    const {cellClicked, handleNumberPadButtonClick, handleCandidateButtonClick, hideNumberPad, isInGameMode, isNumberPadActive, activeCellValue, completedGridCellValue, activeCellCoords, canCellBeSolved} = props;
 
     const [numberPadStyle, setNumberPadStyle] = useState<PositionStylesObj>({
         top: '-9999px',
@@ -182,7 +184,7 @@ const NumberPad = (props: NumberPadProps) => {
     }
 
     function SolveButton() {
-        if (activeCell !== null && activeCell.classList.contains('can-be-solved')) {
+        if (activeCellCoords !== null && canCellBeSolved(activeCellCoords[0], activeCellCoords[1])) {
             return (
                 <button
                     type="button"

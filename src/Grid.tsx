@@ -27,7 +27,7 @@ function Grid(props: GridProps) {
 
     const {currentGridValues, currentGridNoIncorrect, completedGrid, updateGame, givens, nextPossibleAnswers, showCandidates, highlightGivens, highlightSolvableCells, highlightIncorrectCells, highlightCellValue, isInGameMode, showAnswers} = props;
     const [cellClicked, setCellClicked] = useState<null | HTMLInputElement>(null);
-    const [activeCell, setActiveCell] = useState<null | [number, number]>(null);
+    const [activeCellCoords, setActiveCellCoords] = useState<null | [number, number]>(null);
 
     const [isNumberPadActive, setIsNumberPadActive] = useState(false);
     const showNumberPad = () => {
@@ -45,14 +45,14 @@ function Grid(props: GridProps) {
             showNumberPad();
         }
         setCellClicked(e.target as HTMLInputElement);
-        setActiveCell(coords);
+        setActiveCellCoords(coords);
         (e.target as HTMLInputElement).select();
     }
 
     function handleNumberPadButtonClick(e: React.MouseEvent<HTMLButtonElement>) {
         const newGridValues = _.cloneDeep(currentGridValues);
-        const row = activeCell !== null ? activeCell[0] : null;
-        const col = activeCell !== null ? activeCell[1] : null;
+        const row = activeCellCoords !== null ? activeCellCoords[0] : null;
+        const col = activeCellCoords !== null ? activeCellCoords[1] : null;
         const targetButton = e.target as HTMLButtonElement;
         let isCorrect = false;
 
@@ -112,8 +112,8 @@ function Grid(props: GridProps) {
     function handleCandidateButtonClick(activeCellValue: number | number[] | null, e: React.ChangeEvent<HTMLInputElement>) {
 
         let newGridValues = _.cloneDeep(currentGridValues);
-        const row = activeCell !== null ? activeCell[0] : null;
-        const col = activeCell !== null ? activeCell[1] : null;
+        const row = activeCellCoords !== null ? activeCellCoords[0] : null;
+        const col = activeCellCoords !== null ? activeCellCoords[1] : null;
         const targetButton = e.target as HTMLInputElement;
         const targetButtonValue = Number(targetButton.value);
 
@@ -241,8 +241,10 @@ function Grid(props: GridProps) {
                 hideNumberPad={hideNumberPad}
                 isInGameMode={isInGameMode}
                 isNumberPadActive={isNumberPadActive}
-                activeCellValue={ activeCell !== null ? currentGridValues[activeCell[0]][activeCell[1]] : null }
-                completedGridCellValue={ activeCell !== null ? completedGrid[activeCell[0]][activeCell[1]] : null }
+                activeCellValue={ activeCellCoords !== null ? currentGridValues[activeCellCoords[0]][activeCellCoords[1]] : null }
+                completedGridCellValue={ activeCellCoords !== null ? completedGrid[activeCellCoords[0]][activeCellCoords[1]] : null }
+                activeCellCoords={ activeCellCoords }
+                canCellBeSolved={ canCellBeSolved }
             />
         </div>
     );

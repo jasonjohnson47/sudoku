@@ -31,7 +31,6 @@ Game Panel
 --- Self-manage Candidates OR Automatically Manage Candidates
 
 To Do: 
-- Change SolveButton in NumberPad so it doesn't rely on a class being present on the cell
 - Add label to indicate the difficulty level of the current game
 - start game from smartphone camera or image import
 - user can ask for a hint, telling cell numbers are highlighted
