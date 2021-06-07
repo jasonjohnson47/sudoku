@@ -53,7 +53,7 @@ function getNumberPadPosition(activeCell: HTMLDivElement, numberPad: HTMLDivElem
 interface NumberPadProps {
     cellClicked: HTMLInputElement | null;
     handleNumberPadButtonClick: (e: React.MouseEvent<HTMLButtonElement>) => void;
-    handleCandidateButtonClick: (activeCellValue: number | number[] | null, e: React.ChangeEvent<HTMLInputElement>) => void;
+    handleCandidateButtonClick: (e: React.ChangeEvent<HTMLInputElement>) => void;
     hideNumberPad: () => void;
     isInGameMode: boolean;
     isNumberPadActive: boolean;
@@ -61,11 +61,13 @@ interface NumberPadProps {
     completedGridCellValue: number | number[] | null;
     activeCellCoords: null | [number, number];
     canCellBeSolved: (row: number, col: number) => boolean;
+    manageCandidatesMode: boolean;
+    setManageCandidatesMode: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const NumberPad = (props: NumberPadProps) => {
 
-    const {cellClicked, handleNumberPadButtonClick, handleCandidateButtonClick, hideNumberPad, isInGameMode, isNumberPadActive, activeCellValue, completedGridCellValue, activeCellCoords, canCellBeSolved} = props;
+    const {cellClicked, handleNumberPadButtonClick, handleCandidateButtonClick, hideNumberPad, isInGameMode, isNumberPadActive, activeCellValue, completedGridCellValue, activeCellCoords, canCellBeSolved, manageCandidatesMode, setManageCandidatesMode} = props;
 
     const [numberPadStyle, setNumberPadStyle] = useState<PositionStylesObj>({
         top: '-9999px',
@@ -73,8 +75,6 @@ const NumberPad = (props: NumberPadProps) => {
         left: '-9999px',
         right:'auto'
     });
-
-    const [manageCandidatesMode, setManageCandidatesMode] = useState(false);
 
     const activeCell: HTMLDivElement | null = cellClicked ? cellClicked.parentElement as HTMLDivElement : null;
     const numberPadRef = useRef<HTMLDivElement | null>(null);
@@ -148,7 +148,7 @@ const NumberPad = (props: NumberPadProps) => {
                         type="checkbox"
                         value={i}
                         checked={hasCandidate(i)}
-                        onChange={(e) => {handleCandidateButtonClick(activeCellValue, e)}}
+                        onChange={(e) => {handleCandidateButtonClick(e)}}
                     >
                         {i}
                     </ToggleButton>
@@ -210,6 +210,7 @@ const NumberPad = (props: NumberPadProps) => {
                         checked={manageCandidatesMode}
                         onChange={(e) => {
                             setManageCandidatesMode(e.target.checked);
+                            activeCell?.querySelector('input')?.focus();
                         }}
                     />
                     <label htmlFor="manage-candidates-mode" className="form-check-label">

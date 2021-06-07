@@ -29,6 +29,8 @@ function Grid(props: GridProps) {
     const [cellClicked, setCellClicked] = useState<null | HTMLInputElement>(null);
     const [activeCellCoords, setActiveCellCoords] = useState<null | [number, number]>(null);
 
+    const [manageCandidatesMode, setManageCandidatesMode] = useState(false);
+
     const [isNumberPadActive, setIsNumberPadActive] = useState(false);
     const showNumberPad = () => {
         setIsNumberPadActive(true);
@@ -49,98 +51,110 @@ function Grid(props: GridProps) {
         (e.target as HTMLInputElement).select();
     }
 
-    function handleNumberPadButtonClick(e: React.MouseEvent<HTMLButtonElement>) {
-        const newGridValues = _.cloneDeep(currentGridValues);
-        const row = activeCellCoords !== null ? activeCellCoords[0] : null;
-        const col = activeCellCoords !== null ? activeCellCoords[1] : null;
-        const targetButton = e.target as HTMLButtonElement;
-        let isCorrect = false;
+    function updateCandidates(row: number, col: number, value: number) {
 
-        if (row !== null && col !== null) {
+        let newGridValues = _.cloneDeep(currentGridValues);
+        const cellValue = newGridValues[row][col];
+        const completedGridCellValue = completedGrid[row][col];
 
-            if (isInGameMode && (targetButton.className === 'clear-button')) {
-                newGridValues[row][col] = setCandidates(currentGridNoIncorrect)[row][col];
-            } else if (!isInGameMode && (targetButton.className === 'clear-button')) {
-                newGridValues[row][col] = [];
-            } else if (targetButton.className === 'solve-button') {
-                newGridValues[row][col] = completedGrid[row][col];
+        if (Array.isArray(cellValue)) {
+            let newCellValue: number[] = [];
+            if (cellValue.includes(value)) {
+                newCellValue = cellValue.filter((candidate: number) => candidate !== value);
             } else {
-                newGridValues[row][col] = Number(targetButton.value);
+                newCellValue = [...cellValue, value];
             }
-    
-            isCorrect = newGridValues[row][col] === completedGrid[row][col];
+
+            newGridValues[row][col] = newCellValue;
+            
+            if (typeof completedGridCellValue === 'number') {
+                const isCorrect = !cellValue.includes(completedGridCellValue);
+                if (isCorrect) {
+                    updateGame(setCandidates(newGridValues));
+                } else {
+                    updateGame(newGridValues);
+                }
+            }
 
         }
-        
+
+    }
+
+    function updateCellValue(row: number, col: number, newCellValue: number | number[]) {
+        const newGridValues = _.cloneDeep(currentGridValues);
+        const isCorrect = newCellValue === completedGrid[row][col];
+
+        newGridValues[row][col] = newCellValue;
+
         if (isCorrect) {
             updateGame(setCandidates(newGridValues));
         } else {
             updateGame(newGridValues);
         }
 
-        hideNumberPad();
-        
     }
 
     function handleKeyDown(coords: [number, number], e: React.KeyboardEvent<HTMLInputElement>) {
-        const newGridValues = _.cloneDeep(currentGridValues);
+        let newCellValue: number[] | number = [];
         const row = coords[0];
         const col = coords[1];
 
         if (isInGameMode && (e.key === 'Backspace' || e.key === 'Delete')) {
-            newGridValues[row][col] = setCandidates(currentGridNoIncorrect)[row][col];
+            newCellValue = setCandidates(currentGridNoIncorrect)[row][col];
+            updateCellValue(row, col, newCellValue);
+            hideNumberPad();
         } else if (!isInGameMode && (e.key === 'Backspace' || e.key === 'Delete')) {
-            newGridValues[row][col] = [];
-        } else if (RegExp('[1-9]').test(e.key)) {
-            newGridValues[row][col] = Number(e.key);
+            newCellValue = [];
+            updateCellValue(row, col, newCellValue);
+            hideNumberPad();
+        } else if (RegExp('[1-9]').test(e.key) && manageCandidatesMode === false) {
+            newCellValue = Number(e.key);
+            updateCellValue(row, col, newCellValue);
+            hideNumberPad();
+        } else if (RegExp('[1-9]').test(e.key) && manageCandidatesMode === true) {
+            updateCandidates(row, col, Number(e.key));
         } else {
             e.preventDefault();
         }
-
-        const isCorrect = newGridValues[row][col] === completedGrid[row][col];
-
-        if (isCorrect) {
-            updateGame(setCandidates(newGridValues));
-        } else {
-            updateGame(newGridValues);
-        }
-
-        hideNumberPad();
-
+        
     }
 
-    function handleCandidateButtonClick(activeCellValue: number | number[] | null, e: React.ChangeEvent<HTMLInputElement>) {
+    function handleNumberPadButtonClick(e: React.MouseEvent<HTMLButtonElement>) {
+        let newCellValue: number[] | number = [];
+        const row = activeCellCoords !== null ? activeCellCoords[0] : null;
+        const col = activeCellCoords !== null ? activeCellCoords[1] : null;
+        const targetButton = e.target as HTMLButtonElement;
 
-        let newGridValues = _.cloneDeep(currentGridValues);
+        if (row !== null && col !== null) {
+
+            if (isInGameMode && (targetButton.className === 'clear-button')) {
+                newCellValue = setCandidates(currentGridNoIncorrect)[row][col];
+                updateCellValue(row, col, newCellValue);
+            } else if (!isInGameMode && (targetButton.className === 'clear-button')) {
+                newCellValue = [];
+                updateCellValue(row, col, newCellValue);
+            } else if (targetButton.className === 'solve-button') {
+                newCellValue = completedGrid[row][col];
+                updateCellValue(row, col, newCellValue);
+            } else {
+                newCellValue = Number(targetButton.value);
+                updateCellValue(row, col, newCellValue);
+            }
+
+        }
+        
+        hideNumberPad();
+        
+    }
+
+    function handleCandidateButtonClick(e: React.ChangeEvent<HTMLInputElement>) {
         const row = activeCellCoords !== null ? activeCellCoords[0] : null;
         const col = activeCellCoords !== null ? activeCellCoords[1] : null;
         const targetButton = e.target as HTMLInputElement;
         const targetButtonValue = Number(targetButton.value);
 
         if (row !== null && col !== null) {
-            const cellValue = newGridValues[row][col];
-            const completedGridCellValue = completedGrid[row][col];
-
-            if (Array.isArray(cellValue)) {
-                let newCellValue: number[] = [];
-                if (cellValue.includes(targetButtonValue)) {
-                    newCellValue = cellValue.filter((candidate: number) => candidate !== targetButtonValue);
-                } else {
-                    newCellValue = [...cellValue, targetButtonValue];
-                }
-                newGridValues[row][col] = newCellValue;
-                
-                if (typeof completedGridCellValue === 'number') {
-                    const isCorrect = !cellValue.includes(completedGridCellValue);
-                    if (isCorrect) {
-                        updateGame(setCandidates(newGridValues));
-                    } else {
-                        updateGame(newGridValues);
-                    }
-                }
-
-            }
-
+            updateCandidates(row, col, targetButtonValue);
         }
 
     }
@@ -245,6 +259,8 @@ function Grid(props: GridProps) {
                 completedGridCellValue={ activeCellCoords !== null ? completedGrid[activeCellCoords[0]][activeCellCoords[1]] : null }
                 activeCellCoords={ activeCellCoords }
                 canCellBeSolved={ canCellBeSolved }
+                manageCandidatesMode={ manageCandidatesMode }
+                setManageCandidatesMode={ setManageCandidatesMode }
             />
         </div>
     );
