@@ -35,7 +35,8 @@ function getDiffOfCompletedCells(currentGrid: GridArr, nextGrid: GridArr) {
 }
 
 function getGridNextAnswers(grid: GridArr) {
-    return solveCells(solveNonets(reduceCandidatesXWing(removeNakeds(initReduceCandidates(grid)))));
+    return solveCells(crosshatchNonets(reduceCandidates(grid)));
+    //return solveCells(reduceCandidates(crosshatchNonets(grid)));
 }
 
 function getGridAnswers(grid: GridArr) {
@@ -167,12 +168,6 @@ function getNonetRowsCols(rowOrCol: number) {
     return [rowOrCol1, rowOrCol2, rowOrCol3];
 }
 
-/*function getAllValuesInSameColRowNonet(grid: GridArr, row: number, column: number) {
-    const allValues = Array.from(new Set(getNonetValues(grid, row, column).concat(getRowValues(grid, row)).concat(getColumnValues(grid, column)))).filter(function(value) {
-        return typeof value === 'number' || (Array.isArray(value) && value.length !== 0);
-    });
-    return allValues;
-}*/
 function getAllValuesInSameColRowNonet(grid: GridArr, row: number, column: number) {
     const rowValues = getRowValues(grid, row);
     const columnValues = getColumnValues(grid, column);
@@ -185,7 +180,6 @@ function getAllValuesInSameColRowNonet(grid: GridArr, row: number, column: numbe
 
     return allNonEmptyValues;
 }
-
 
 function isCellSolved (grid: GridArr, row: number, column: number) {
     if (typeof grid[row][column] === 'number') {
@@ -203,6 +197,16 @@ function isCleanValue(value: number | number[]) {
 }
 
 function crosshatchNonet (grid: GridArr, row: number, column: number) {
+
+    // Find candidates for nonet
+    // For each candidate, check if candidate exists as a solved cell in each row/column
+    // If candidate exists as solved cell in row, remove any unknown cells as possible places for that number
+    // Do the same for columns
+    // If only one cell in the nonet remains unknown, fill it in with that number
+    // "o" = unknown cell; "x" = cell removed from possibly holding the number
+
+    // not sure if we need this technique/step if we use all possible techniques for reducing candidates
+    // will be working on 'locked candidates type 2 (lockedCandidatesType2)' technique for reducing candidates next and will revisit if this is necessary
 
     const nonetValues = getNonetValues(grid, row, column);
     const candidates = [1,2,3,4,5,6,7,8,9].filter(function(value) {
@@ -223,8 +227,8 @@ function crosshatchNonet (grid: GridArr, row: number, column: number) {
         });
 
         temporaryNonetValues.forEach(function(value, index) {
-            let nonetRowValues;
-            let nonetColumnValues;
+            let nonetRowValues: UnitArr;
+            let nonetColumnValues: UnitArr;
 
             if (index <= 2) {
                 nonetRowValues = getRowValues(grid, nonetRows[0]);
@@ -318,8 +322,8 @@ function nonetValuesArrayIndexToGridCell(nonetValuesIndex: number, nonetTopLeftS
     return [gridCellRow, gridCellCol];
 }
 
-function solveNonets(grid: GridArr) {
-    const solvedCells = [];
+function crosshatchNonets(grid: GridArr) {
+    const solvedCells: CellObj[] = [];
     for (let row = 0; row <= 6; row = row + 3) {
         for (let col = 0; col <= 6; col = col + 3) {
             const cell = crosshatchNonet(grid, row, col);
@@ -780,14 +784,14 @@ function removeCandidateFromCell(grid: GridArr, row: number, column: number, val
     }
 }
 
-function initReduceCandidates(grid: GridArr) {
+function initLockedCandidatesType1(grid: GridArr) {
     const results: CellObj[] = [];
     const gridClone = _.cloneDeep(grid);
 
     for (let row = 0; row <= 6; row = row + 3) {
         for (let col = 0; col <= 6; col = col + 3) {
-            const reducedCandidatesRow = reduceCandidates(gridClone, row, col, 'row');
-            const reducedCandidatesColumn = reduceCandidates(gridClone, row, col, 'column');
+            const reducedCandidatesRow = lockedCandidatesType1(gridClone, row, col, 'row');
+            const reducedCandidatesColumn = lockedCandidatesType1(gridClone, row, col, 'column');
             if (reducedCandidatesRow !== undefined) {
                 results.push(...reducedCandidatesRow);
                 reducedCandidatesRow.forEach(function(updatedCell) {
@@ -805,15 +809,75 @@ function initReduceCandidates(grid: GridArr) {
     return updateGrid(grid, results);
 }
 
-function reduceCandidates(grid: GridArr, row: number, column: number, direction: 'row' | 'column') {
+function reduceCandidatesBySolvedCells(grid: GridArr) {
+
+    /* Reduce candidates by looking in each row, column, and nonet, and removing any solved cells values */
+
+    const results: CellObj[] = [];
+    let gridClone = _.cloneDeep(grid);
+
+    gridClone.forEach(function(row, i) {
+
+        const rowValues = getRowValues(gridClone, i);
+        const rowValuesSolved = rowValues.filter(function(cellValue) {
+            return typeof cellValue === 'number';
+        });
+
+        row.forEach(function(cell, j) {
+
+            /* How could we not do this 81 times, just 9 times */
+            const columnValues = getColumnValues(gridClone, j);
+            const columnValuesSolved = columnValues.filter(function(cellValue) {
+                return typeof cellValue === 'number';
+            });
+
+            const nonetValues = getNonetValues(gridClone, i, j);
+            const nonetValuesSolved = nonetValues.filter(function(cellValue) {
+                return typeof cellValue === 'number';
+            });
+
+            if (Array.isArray(cell)) {
+                const reducedCell = cell.filter(candidate => !rowValuesSolved.includes(candidate))
+                    .filter(candidate => !columnValuesSolved.includes(candidate))
+                    .filter(candidate => !nonetValuesSolved.includes(candidate));
+
+                if (!_.isEqual(cell, reducedCell)) {
+                    results.push({
+                        row: i,
+                        column: j,
+                        value: reducedCell
+                    });
+                }
+                
+            }
+        });
+    });
+
+    return updateGrid(grid, results);
+
+}
+
+function lockedCandidatesType1(grid: GridArr, row: number, column: number, direction: 'row' | 'column') {
 
     // row and column = the nonet's top left cell, for example 0,0 and 0,3 and 3,6, etc.
     // if direction = row, main axis = row, cross axis = column
     // if direction = column, main axis = column, cross axis = row
 
     // If a nonet has candidates that only exist in a row or column within the nonet, remove those candidates from other cells in the same row or column outside the nonet.
-    // For example: [6, 8, 3, [1,2], [1,2], 9, 7, 4, 5] <- nonetValues; 1s and 2s in the same row
-    // For example: [9, 6, [1,4,5], 7, 3, [1,4,5], [1,5], 2, 8] <- nonetValues; 4s in the same column
+
+    /* For example, given nonetValues:
+    [6, 8, 3,
+    [1,2], [1,2], 9,
+    7, 4, 5] 
+    remove 1s and 2s in the same row outside the nonet
+
+    For example, given nonetValues:
+    [9, 6, [1,4,5],
+    7, 3, [1,4,5],
+    [1,5], 2, 8]
+    
+    remove 4s in the same column outside the nonet
+    */
 
     const nonetValues = getNonetValues(grid, row, column);
     const results: CellObj[] = [];
@@ -956,6 +1020,10 @@ function reduceCandidates(grid: GridArr, row: number, column: number, direction:
         return results;
     }
 
+}
+
+function reduceCandidates(grid: GridArr) {
+    return reduceCandidatesXWing(removeNakeds(initLockedCandidatesType1(reduceCandidatesBySolvedCells(grid))));
 }
 
 function solveCell(grid: GridArr, row: number, column: number) {
@@ -1259,9 +1327,8 @@ function findDuplicatesInSharedUnits(grid: GridArr): CellObj[] {
         }
     });
 
-    //console.log(_.uniqWith(duplicates, _.isEqual));
     return _.uniqWith(duplicates, _.isEqual);
     
 }
 
-export { setCandidates, solveCells, solveNonets, removeNakeds, reduceCandidatesXWing, initReduceCandidates, verifyCompletedGrid, getGridNextAnswers, getGridAnswers, getDiffOfCompletedCells, findDuplicatesInSharedUnits };
+export { setCandidates, solveCells, crosshatchNonets, removeNakeds, reduceCandidatesXWing, initLockedCandidatesType1, verifyCompletedGrid, getGridNextAnswers, getGridAnswers, getDiffOfCompletedCells, findDuplicatesInSharedUnits };

@@ -161,7 +161,7 @@ function App() {
     const initialGrid = history[0].grid;
     const currentGridValues = history[stepNumber].grid;
 
-    const currentGridNoIncorrect = _.cloneDeep(currentGridValues).map(
+    const currentGridNoIncorrect: GridArr = _.cloneDeep(currentGridValues).map(
         (row, i) =>
             row.map((cell, j) => {
 
@@ -194,7 +194,9 @@ function App() {
     );
 
     const nextGridValues = getGridNextAnswers(currentGridNoIncorrect);
-    const nextPossibleAnswers = getDiffOfCompletedCells(
+    //console.log(currentGridNoIncorrect);
+    //console.log(nextGridValues);
+    const nextPossibleAnswers: GridArr = getDiffOfCompletedCells(
         currentGridNoIncorrect,
         nextGridValues
     );

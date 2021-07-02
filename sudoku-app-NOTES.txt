@@ -38,5 +38,4 @@ To Do:
 - Ability to turn off the automatic reducing of candidates
 
 Do this?
-- If in 'edit candidates' mode, keyboard press can toggle candidates
 - Automatically reduce candidates as user manually edits candidates
