@@ -5,6 +5,7 @@ import NewGamePanel from './NewGamePanel';
 import GameSettingsPanel from './GameSettingsPanel';
 import History from './History';
 import HighlightCellOptions from './HighlightCellOptions';
+import CustomGameInstructions from './CustomGameInstructions';
 import {
     setCandidates,
     verifyCompletedGrid,
@@ -290,27 +291,7 @@ function App() {
                 </Dropdown.Menu>
             </Dropdown>
 
-            <div
-                className={
-                    isInGameMode === true
-                        ? 'custom-game-instructions d-none'
-                        : 'custom-game-instructions'
-                }
-            >
-                <p>
-                    Enter your starting numbers ("givens") in the cells to
-                    create your own game. When you have finished entering all
-                    the givens, click "Start Game" to start solving the puzzle.
-                </p>
-                <button
-                    className="btn btn-primary"
-                    onClick={() => {
-                        createNewGame(currentGridValues);
-                    }}
-                >
-                    Start Game
-                </button>
-            </div>
+            <CustomGameInstructions isInGameMode={isInGameMode} createNewGame={createNewGame} currentGridValues={currentGridValues}  />
 
             <Grid
                 currentGridValues={currentGridValues}
